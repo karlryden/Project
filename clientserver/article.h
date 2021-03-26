@@ -8,13 +8,16 @@ class Article {
     public:
         Article(const std::string&, const std::string&, const std::string&);
         std::string to_string() const;       
-        bool operator==(const Article&) const; 
+        bool operator==(const Article&) const;
+
     private:
         const std::string title;
         const std::string author;
         const std::string text;
         static unsigned int count;
-        const unsigned int id;        
+        const unsigned int id;
+        
+        std::string::size_type hashcode() const;
 };
 
 #endif
