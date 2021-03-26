@@ -1,6 +1,9 @@
 #include "newsgroup.h"
 #include <string>
 
+#ifndef DATABASE_H
+#define DATABASE_H
+
 class Database {
     public:
         virtual std::string get_article(unsigned int, unsigned int) = 0;
@@ -10,3 +13,5 @@ class Database {
         virtual bool remove_article(unsigned int, unsigned int) = 0;
         virtual bool remove_newsgroup(unsigned int, unsigned int) = 0;
 };
+
+#endif

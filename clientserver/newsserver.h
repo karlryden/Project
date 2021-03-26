@@ -2,6 +2,9 @@
 #include "database.h"
 #include "messagehandler.h"
 
+#ifndef NEWSSERVER_H
+#define NEWSSERVER_H
+
 class NewsServer : public Server {
     public:
         NewsServer();
@@ -19,3 +22,5 @@ class NewsServer : public Server {
         Database& db;
         MessageHandler mh;
 };
+
+#endif
