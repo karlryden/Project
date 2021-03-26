@@ -4,11 +4,12 @@
 
 class NewsServer : public Server {
     public:
+        NewsServer();
         NewsServer(Database);
         bool create_newsgroup(?);
         bool create_article(?, ?);
         bool remove_newsgroup(?);
-        bool remove_article(?);
+        bool remove_article(?, ?);
         ? list_newsgroups();
         ? list_articles(?);
     private:
