@@ -10,3 +10,7 @@ Article::Article(const string& tit, const string& aut, const string& tex) :
 string Article::to_string() const {
     return "";
 }
+
+bool Article::operator==(const Article& a) const {
+    return (id == a.id);
+}

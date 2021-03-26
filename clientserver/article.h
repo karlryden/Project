@@ -8,7 +8,7 @@ class Article {
     public:
         Article(const std::string&, const std::string&, const std::string&);
         std::string to_string() const;       
-        bool operator==(const Article&); 
+        bool operator==(const Article&) const; 
     private:
         const std::string title;
         const std::string author;
