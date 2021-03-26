@@ -1,5 +1,6 @@
 #include "server.h"
 #include "database.h"
+#include "messagehandler.h"
 
 class NewsServer : public Server {
     public:
@@ -13,6 +14,8 @@ class NewsServer : public Server {
         bool remove_article(unsigned int, unsigned int);
         std::string list_newsgroups();
         std::string list_articles(unsigned int);
+        bool handle_request();
     private:
         Database& db;
+        MessageHandler mh;
 };
