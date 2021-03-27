@@ -9,6 +9,7 @@ class Article {
         Article(const std::string&, const std::string&, const std::string&);
         std::string to_string() const;       
         bool operator==(const Article&) const;
+        friend struct std::hash<Article>;
 
     private:
         const std::string title;
@@ -19,5 +20,13 @@ class Article {
         
         std::string::size_type hashcode() const;
 };
+
+namespace std {
+    template <> struct hash<Article> {
+        size_t operator()(const Article& a) const {
+            return a.id;
+        }
+    };
+}
 
 #endif
