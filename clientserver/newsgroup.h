@@ -12,19 +12,19 @@ class NewsGroup {
         bool set_article(const Article&);
         bool remove_article(const unsigned int);
         std::string to_string() const;
-        friend struct std::hash<NewsGroup>;
+        bool operator==(const NewsGroup&) const;
+        const unsigned int id;
 
     private:
         const std::string name;
         std::unordered_set<Article> ng;
         static unsigned int count;
-        const unsigned int id;
 };
 
 namespace std {
     template <> struct hash<NewsGroup> {
-        size_t operator()(const NewsGroup& ng) const {
-            return ng.id;
+        std::size_t operator()(const NewsGroup& ng) const {
+            return std::hash<int>()(ng.id);
         }
     };
 }
