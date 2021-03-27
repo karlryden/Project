@@ -9,14 +9,14 @@ class NewsServer : public Server {
     public:
         NewsServer();
         NewsServer(Database&);
-        std::string get_newsgroup(unsigned int);
-        std::string get_article(unsigned int, unsigned int);
+        std::string get_newsgroup(std::string);
+        std::string get_article(std::string, std::string, std::string);
         bool create_newsgroup(std::string);
-        bool create_article(std::string, std::string, std::string, unsigned int);
-        bool remove_newsgroup(unsigned int);
-        bool remove_article(unsigned int, unsigned int);
+        bool create_article(std::string, std::string, std::string, std::string);
+        bool remove_newsgroup(std::string);
+        bool remove_article(std::string, std::string, std::string);
         std::string list_newsgroups();
-        std::string list_articles(unsigned int);
+        std::string list_articles(std::string);
         bool handle_request();
     private:
         Database& db;
