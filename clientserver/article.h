@@ -18,15 +18,15 @@ class Article {
         static unsigned int count;
 };
 
-namespace std {
-    template <> struct hash<Article> {
-        typedef Article argument_type;
-        typedef std::size_t result_type;
+// namespace std {
+//     template <> struct hash<Article> {
+//         typedef Article argument_type;
+//         typedef std::size_t result_type;
 
-        result_type operator()(const Article& a) const {
-            return a.id;
-        }
-    };
-}
+//         result_type operator()(const Article& a) const {
+//             return a.id;
+//         }
+//     };
+// }
 
 #endif

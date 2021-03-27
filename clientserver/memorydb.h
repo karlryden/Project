@@ -6,14 +6,15 @@
 
 class MemoryDatabase : public Database {
     public:
-        std::string get_newsgroup(unsigned int) const;
-        std::string get_article(const unsigned int, const unsigned int) const;
+        std::string get_newsgroup(std::string) const;
+        std::string get_article(std::string, std::string, std::string) const;
         bool set_newsgroup(std::string);
-        bool set_article(unsigned int, std::string, std::string, std::string);
-        bool remove_newsgroup(unsigned int);
-        bool remove_article(unsigned int, unsigned int);
+        bool set_article(std::string, std::string, std::string, std::string);
+        bool remove_newsgroup(std::string);
+        bool remove_article(std::string, std::string, std::string);
     private:
-        std::unordered_set<NewsGroup> table;
+        std::vector<NewsGroup> table;
+        // std::unordered_set<NewsGroup> table;
 };
 
 #endif
