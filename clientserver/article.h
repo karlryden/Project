@@ -9,9 +9,10 @@ class Article {
         Article(const std::string&, const std::string&, const std::string&);
         std::string to_string() const;       
         bool operator==(const Article&) const;
-        const unsigned int id;
+        std::string get_author() const;
         std::string get_title() const;
-
+        const unsigned int id;
+        
     private:
         const std::string title;
         const std::string author;

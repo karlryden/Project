@@ -8,14 +8,18 @@ using size_t = std::string::size_type;
 Article::Article(const string& tit, const string& aut, const string& tex) : title(tit), author(aut), text(tex), id(count++) {}
 
 string Article::to_string() const {
-    return id + " " + title + " " + author + " " + text;
+    return title + " " + author + " " + text;
 }
 
 bool Article::operator==(const Article& a) const{
-    return a.id==id;
+    return (a.author == author) && (a.title == title);
 }
 
-std::string Article::get_title() const{
+string Article::get_author() const {
+    return author;
+}
+
+string Article::get_title() const{
     return title;
 }
 //bool Article::operator==(const Article& a) const {

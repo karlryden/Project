@@ -13,9 +13,9 @@ public:
     bool remove_newsgroup(std::string);
     bool remove_article(std::string, std::string, std::string);
     //
-    vector::iterator begin();
-    vector::iterator end();
-    vector::size_type size();
+    std::vector<NewsGroup>::iterator begin();
+    std::vector<NewsGroup>::iterator end();
+    std::vector<NewsGroup>::size_type size();
 
 private:
         std::vector<NewsGroup> table;

@@ -8,21 +8,20 @@
 class NewsGroup {
     public:
         NewsGroup(const std::string&);
-        Article get_article(std::string, std::string) const;
+        Article get_article(unsigned int) const;
         bool set_article(const Article&);
-        bool remove_article(const std::string&);
+        bool remove_article(unsigned int);
         std::string to_string() const;
         bool operator==(const NewsGroup&) const;
-        Article make_article(const std::string&,  const std::string&, const std::string&);
     
         const unsigned int id;
     //
-        std::vector::iterator begin();
-        std::vector::iterator end();
-        std::vector::size_type size();
-        std::string get_title();
+        std::vector<Article>::iterator begin();
+        std::vector<Article>::iterator end();
+        std::vector<Article>::size_type size();
+
     private:
-        const std::string title;
+        const std::string name;
         std::vector<Article> ng;
         // std::unordered_set<Article> ng;
         static unsigned int count;
