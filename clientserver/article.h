@@ -10,6 +10,7 @@ class Article {
         std::string to_string() const;       
         bool operator==(const Article&) const;
         const unsigned int id;
+        std::string get_title() const;
 
     private:
         const std::string title;

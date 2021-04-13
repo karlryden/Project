@@ -50,3 +50,13 @@ bool MemoryDatabase::remove_article(string name, string tit, string aut) {
     
     return ng.remove_article(tit, aut);
 }
+vector::iterator MemoryDatabase::begin(){
+    return table.begin();
+}
+vector::iterator MemoryDatabase::end(){
+    return table.end();
+}
+int MemoryDatabase::size(){
+    return table.size()
+}
+
