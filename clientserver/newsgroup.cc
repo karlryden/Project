@@ -40,9 +40,15 @@ bool NewsGroup::remove_article(unsigned int id){
         return true;
     }
 }
+
+string NewsGroup::get_name() const {
+    return name;
+}
+
 string NewsGroup::to_string() const {
     return id + " " + name + " ";
 }
+
 bool NewsGroup::operator==(const NewsGroup& n) const{
     return n.id == id;
 }

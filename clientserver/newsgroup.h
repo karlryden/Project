@@ -14,6 +14,7 @@ class NewsGroup {
         std::string to_string() const;
         bool operator==(const NewsGroup&) const;
     
+        std::string get_name() const;
         const unsigned int id;
     //
         std::vector<Article>::iterator begin();
