@@ -19,7 +19,7 @@ string MemoryDatabase::get_article(unsigned int ng_id, unsigned int a_id) const 
     return a.to_string();
 }
 
-bool MemoryDatabase::set_newsgroup(string name) {
+bool MemoryDatabase::set_newsgroup(string name) {                       //borde väl checka efter om den redan finns om newsgroups skulle vara unika och returnera false.
     NewsGroup ng{name};
     table.push_back(ng);    
     
