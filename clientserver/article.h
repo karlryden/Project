@@ -11,12 +11,12 @@ class Article {
         bool operator==(const Article&) const;
         std::string get_author() const;
         std::string get_title() const;
-        const unsigned int id;
+        unsigned int id;
         
     private:
-        const std::string title;
-        const std::string author;
-        const std::string text;
+        std::string title;
+        std::string author;
+        std::string text;
         static unsigned int count;
 };
 

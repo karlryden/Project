@@ -7,14 +7,14 @@ using std::string;
 using std::find;
 using std::vector;
 
-unsigned int NewsGroup::count = 0;
+unsigned int NewsGroup::count{0};
 
-NewsGroup::NewsGroup(const string& n) : name{n}, id{count++} {}
+NewsGroup::NewsGroup(const string& n) : name{n}, id(count++) {}
 
 Article NewsGroup::get_article(unsigned int id) const {
     auto res=std::find_if(ng.begin(), ng.end(), [id](const Article& a) {return a.id == id;});
     if(res == ng.end()){
-        throw NoSuchElement("element not found");            //ngt exception
+        throw std::invalid_argument("element not found");            //ngt exception
     } else {
         return *res;
     }
@@ -53,6 +53,3 @@ bool NewsGroup::operator==(const NewsGroup& n) const{
     return n.id == id;
 }
 
-vector<Article>::iterator NewsGroup::begin() {return ng.begin();}
-vector<Article>::iterator NewsGroup::end() {return ng.end();}
-vector<Article>::size_type NewsGroup::size() {return ng.size();}

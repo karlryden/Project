@@ -15,15 +15,14 @@ class NewsGroup {
         bool operator==(const NewsGroup&) const;
     
         std::string get_name() const;
-        const unsigned int id;
+        unsigned int id;
+        std::vector<Article> ng;
     //
-        std::vector<Article>::iterator begin();
-        std::vector<Article>::iterator end();
-        std::vector<Article>::size_type size();
+      
 
     private:
-        const std::string name;
-        std::vector<Article> ng;
+        std::string name;
+        
         // std::unordered_set<Article> ng;
         static unsigned int count;
 };
