@@ -19,16 +19,16 @@ string MemoryDatabase::get_article(unsigned int ng_id, unsigned int a_id) const 
     return a.to_string();
 }
 
-bool MemoryDatabase::set_newsgroup(string name) {
+bool MemoryDatabase::set_newsgroup(string name) {                       //borde väl checka efter om den redan finns om newsgroups skulle vara unika och returnera false.
     NewsGroup ng{name};
     table.push_back(ng);    
     
     return true;
 }
 
-bool MemoryDatabase::set_article(string name, string tit, string aut, string tex) {
+bool MemoryDatabase::set_article(unsigned int id, string tit, string aut, string tex) {
     // NewsGroup ng{*(table.find(ng_id))};
-    NewsGroup ng{*find_if(table.begin(), table.end(), [name](const NewsGroup& n) {return n.get_name() == name;})};
+    NewsGroup ng{*find_if(table.begin(), table.end(), [id](const NewsGroup& n) {return n.id == id;})};
     Article a(tit, aut, tex);
 
     return ng.set_article(a);
@@ -62,3 +62,17 @@ int MemoryDatabase::size() {
     return static_cast<int>(table.size());
 }
 
+string MemoryDatabase::list_articles(unsigned int id){
+    std::string res{};
+    auto ng=std::find_if(begin(), end(), [id](const NewsGroup& n){return n.id==id;}); //get_newsgroup? men den returnerar string ?
+    res+=ng->ng.size() + " ";
+    std::for_each(ng->ng.begin(), ng->ng.end(), [&res](const Article& a){res+=a.id+ " " + a.get_title() + " ";});
+    return res;
+}
+
+string MemoryDatabase::list_newsgroups(){
+    string res{};
+    res+=size() + " ";
+    std::for_each(begin(), end(), [&res](const NewsGroup& ng){res+=ng.to_string() + " " + std::to_string(ng.id);});
+    return res;
+}

@@ -4,9 +4,10 @@
 
 #include <cstdlib>
 #include <iostream>
+
 #include <stdexcept>
 #include <string>
-
+#include "protocol.h"
 using namespace std;
 
 /*
@@ -19,7 +20,32 @@ void writeNumber(const Connection& conn, int value)
         conn.write((value >> 8) & 0xFF);
         conn.write(value & 0xFF);
 }
-
+void writeString(const Connection& conn, const string& s){
+    for (char c : s) {
+        conn.write(c);
+    }
+}
+void writeMsg(const Connection& conn, istream& in){
+    int n;
+    
+    while (n != static_cast<int>(Protocol::COM_END)){
+        in >> n;
+        
+        conn.write(n);
+        if (n == static_cast<int>(Protocol::PAR_STRING)){
+            in >> n;
+            std::cout << n << std::endl;
+            
+            conn.write(n);
+            char ch{};
+            for (int i = 0; i < n; i++){
+                in >> ch;
+                conn.write(ch);
+            }
+        }
+    }
+    
+}
 /*
  * Read a string from the server.
  */
@@ -61,22 +87,25 @@ Connection init(int argc, char* argv[])
 }
 
 int app(const Connection& conn)
-{
-        cout << "Type a number: ";
+{       
+    while (true){
+        std::cout << "Type a message: ";
         
-        while (true) {
-                try {
-                        cout << nbr << " is ...";
-                        writeNumber(conn, nbr);
-                        string reply = readString(conn);
-                        cout << " " << reply << endl;
-                        cout << "Type another number: ";
-                } catch (ConnectionClosedException&) {
-                        cout << " no reply from server. Exiting." << endl;
-                        return 1;
-                }
+        writeMsg(conn, cin);
+        try {
+                std::cout <<  " is ...";
+                
+                string reply = readString(conn);
+                std::cout << " " << reply << endl;
+                std::cout << "Type another message: ";
+        } catch (ConnectionClosedException&) {
+                std::cout << " no reply from server. Exiting." << endl;
+                return 1;
         }
-        cout << "\nexiting.\n";
+    }
+        
+        
+        std::cout << "\nexiting.\n";
         return 0;
 }
 
