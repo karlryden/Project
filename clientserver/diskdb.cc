@@ -19,9 +19,24 @@ std::string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
 }
 
 std::string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
-    if (!fs::exists("data/" + ng_id)) {
+    fs::directory_entry ng;
+    for (const auto& entry : fs::directory_iterator("data")) {
+        string dir = entry.path().u8string();
+        if (dir.find(ng_id) != string::npos) {
+            ng = entry;
+            break;
+        }
+    } if (ng.path().u8string() == "") { // Om ingen ng-mapp hittades?
         return NULL; // ej säker på om vi ska throwa/returna någon 404
-    } if (!fs::exists("data/" + ng_id + "/" + a_id)) {
+    } 
+    fs::directory_entry art;
+    for (const auto& entry : fs::directory_iterator(ng.path().u8string())) {
+        string fn = entry.path().u8string();
+        if (fn.find(a_id) != string::npos) {
+            art = entry;
+            break;
+        }
+    } if (ng.path().u8string() + '/' == art.path().u8string()) {    // Om ingen article-fil hittades?
         return NULL; // ej säker på om vi ska throwa/returna någon 404
     }
     // öppna filen med filestream, returna innehåll?
