@@ -84,9 +84,41 @@ bool DiskDatabase::set_article(unsigned int ng_id, std::string author, std::stri
 }
 
 bool DiskDatabase::remove_newsgroup(unsigned int ng_id) {
-
+    fs::directory_entry ng;
+    for (const auto& entry : fs::directory_iterator("data")) {
+        string dir = entry.path();
+        if (dir.find(ng_id) != string::npos) {
+            ng = entry;
+            break;
+        }
+    } if (ng.path() == "") { // Om ingen ng-mapp hittades?
+        return false; 
+    } 
+    fs::remove(ng.path());
+    return true;
 }
 
 bool DiskDatabase::remove_article(unsigned int ng_id, unsigned int a_id) {
-
+    fs::directory_entry ng;
+    for (const auto& entry : fs::directory_iterator("data")) {
+        string dir = entry.path();
+        if (dir.find(ng_id) != string::npos) {
+            ng = entry;
+            break;
+        }
+    } if (ng.path() == "") { // Om ingen ng-mapp hittades?
+        return false; 
+    } 
+    fs::directory_entry art;
+    for (const auto& entry : fs::directory_iterator(ng.path())) {
+        string dir = entry.path();
+        if (dir.find(a_id) != string::npos) {   // kan bli problem om ng_id == a_id
+            art = entry;
+            break;
+        }
+    } if (ng.path().string() + "/" == art.path()) {    // Om ingen article-fil hittades?
+        return false;
+    }
+    fs::remove(art.path());
+    return true;
 }
