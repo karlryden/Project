@@ -34,8 +34,8 @@ std::string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
 std::string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
     fs::directory_entry ng;
     for (const auto& entry : fs::directory_iterator("data")) {
-        string dir = entry.path();
-        if (dir.find(ng_id) != string::npos) {
+        string dir = entry.path(); // Kan vara så att det ej går att assigna path till string, isf får vi använda path.string()
+        if (dir.find(ng_id) != string::npos) {  // men får inga kompileringsfel för path = string eller path == string
             ng = entry;
             break;
         }
