@@ -4,6 +4,12 @@ using std::string;
 namespace fs = std::experimental::filesystem;   //vet ej om vi borde köra på fs eller linux funktioner
 using std::fstream;
 
+/*
+Tänker att vi kör att newsgroupmappar heter name+ng_id? Och sen heter articlefiler bara a_id?
+Finns en fs::exists funktion som kollar om de finns ett entry i ett dir men kör inte på den för
+måste ändå leta upp mappen om den finns sen. 
+*/
+
 DiskDatabase::DiskDatabase() {
     if (!fs::exists("data")) {
         fs::create_directory("data");
@@ -12,10 +18,17 @@ DiskDatabase::DiskDatabase() {
 }
 
 std::string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
-    if (!fs::exists("data/" + ng_id)) {
+    fs::directory_entry ng;
+    for (const auto& entry : fs::directory_iterator("data")) {
+        string dir = entry.path().u8string();
+        if (dir.find(ng_id) != string::npos) {
+            ng = entry;
+            break;
+        }
+    } if (ng.path().u8string() == "") { // Om ingen ng-mapp hittades?
         return NULL; // ej säker på om vi ska throwa/returna någon 404
-    }
-    // öppna filen med filestream, läs första raden för namn och returna med articles?
+    } 
+    return ??
 }
 
 std::string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
