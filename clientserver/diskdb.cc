@@ -1,6 +1,8 @@
 #include "diskdb.h"
 
 using std::string;
+using std::cout;
+using std::endl;
 namespace fs = std::experimental::filesystem;   //vet ej om vi borde köra på fs eller linux funktioner
 using std::fstream;
 
@@ -17,7 +19,7 @@ DiskDatabase::DiskDatabase() {
     iter = fs::recursive_directory_iterator("data");
 }
 
-std::string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
+string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
     fs::directory_entry ng;
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
@@ -31,7 +33,7 @@ std::string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
     return ?? // vad ska vi returna? namn? artiklar?
 }
 
-std::string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
+string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
     fs::directory_entry ng;
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path(); // Kan vara så att det ej går att assigna path till string, isf får vi använda path.string()
@@ -55,7 +57,7 @@ std::string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) con
     // öppna filen med filestream, returna innehåll?
 }
 
-bool DiskDatabase::set_newsgroup(std::string name) {
+bool DiskDatabase::set_newsgroup(string name) {
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
         if (dir.find(name) != string::npos) {
@@ -67,7 +69,7 @@ bool DiskDatabase::set_newsgroup(std::string name) {
     return true;
 }
 
-bool DiskDatabase::set_article(unsigned int ng_id, std::string author, std::string title, std::string text) {
+bool DiskDatabase::set_article(unsigned int ng_id, string author, string title, string text) {
     fs::directory_entry ng;
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
@@ -121,4 +123,30 @@ bool DiskDatabase::remove_article(unsigned int ng_id, unsigned int a_id) {
     }
     fs::remove(art.path());
     return true;
+}
+
+string DiskDatabase::list_newsgroups() {
+    string ret{};
+    for (const auto& entry : fs::directory_iterator("data")) {
+        ret += entry; // ??
+    }
+    return ret;
+}
+
+string DiskDatabase::list_articles(unsigned int ng_id) {
+    fs::directory_entry ng;
+    for (const auto& entry : fs::directory_iterator("data")) {
+        string dir = entry.path();
+        if (dir.find(ng_id) != string::npos) {
+            ng = entry;
+            break;
+        }
+    } if (ng.path() == "") { // Om ingen ng-mapp hittades?
+        return NULL;    // ?? 
+    }
+    string ret{};
+    for (const auto& entry : fs::directory_iterator(ng.path())) {
+        ret += entry; // ??
+    }
+    return ret;
 }
