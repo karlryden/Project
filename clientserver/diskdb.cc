@@ -26,10 +26,10 @@ string ng_string(fs::directory_entry entry) {
     string ng_id = entry.path().string();
 
     name.erase(std::remove_if(std::begin(name), std::end(name), 
-                                [](auto c) {return std::isdigit(c);}), name.end()); 
+                                [](char c) {return std::isdigit(c);}), name.end()); 
 
     ng_id.erase(std::remove_if(std::begin(ng_id), std::end(ng_id), 
-                                [](auto c) {return !std::isdigit(c);}), ng_id.end());   
+                                [](char c) {return !std::isdigit(c);}), ng_id.end());   
 
     return ng_id + " " + name;
 }
@@ -37,7 +37,7 @@ string ng_string(fs::directory_entry entry) {
 string art_string(fs::directory_entry entry) {
     string a_id = entry.path().string();
     a_id.erase(std::remove_if(std::begin(a_id), std::end(a_id), 
-                                [](auto c) {return !std::isdigit(c);}), a_id.end());   
+                                [](char c) {return !std::isdigit(c);}), a_id.end());   
 
     return a_id;
 }
@@ -187,4 +187,5 @@ int main() {
     DiskDatabase ddb{};
 
     ddb.set_newsgroup("ng");
+    // ddb.remove_newsgroup(1);
 }
