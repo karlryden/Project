@@ -19,6 +19,8 @@ class DiskDatabase : public Database {
         bool remove_article(unsigned int, unsigned int);
         std::string list_articles(unsigned int);
         std::string list_newsgroups();
+
+        unsigned int getNewId();
 };
 
 unsigned int ng_hash(std::string);

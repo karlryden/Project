@@ -8,6 +8,8 @@ using std::endl;
 namespace fs = std::experimental::filesystem;
 using std::fstream;
 
+char delimiter{'^'};
+
 /*
 Tänker att vi kör att newsgroupmappar heter name+ng_id? Och sen heter articlefiler bara a_id?
 */
@@ -44,47 +46,103 @@ string art_string(fs::directory_entry entry) {
 
 DiskDatabase::DiskDatabase() {
     if (!fs::exists("data")) {
+        cout << "creating data" << endl;
         fs::create_directory("data");
     }
+    fstream file;
+    int id{0};
+    if (!fs::exists("data/ng_count.txt")) {
+        cout << "creating count" << endl;
+        file.open("data/ng_count.txt", fstream::out);
+        file << 0;
+        file.close();
+    }
+     
 }
+
+unsigned int DiskDatabase::getNewId(){
+    unsigned int new_id;
+    unsigned int next;
+    fstream file;
+    file.open("data/ng_count.txt", fstream::out);
+    file >> next;
+    new_id = next++;
+    file << next;
+    file.close();
+    return new_id;
+}
+
 
 string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
     fs::directory_entry ng;
+    string::size_type dlim;
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
-        if (dir.find(ng_id) != string::npos) {
+        dlim = dir.find(delimiter);
+        unsigned int id{std::stoul(dir.substr(dlim+1))};
+        if (id == ng_id) {
             ng = entry;
             break;
         }
     } if (ng.path() == "") { // Om ingen ng-mapp hittades?
         return ""; 
-    } 
-    return "";  // vad ska vi returna? namn? artiklar?
+    }
+    string name{ng.path().string().substr(5, dlim - 5)};
+
+    return name; 
 }
 
+// titel|författare|text 
 string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
     fs::directory_entry ng;
+    string::size_type ng_dlim;
     for (const auto& entry : fs::directory_iterator("data")) {
-        string dir = entry.path(); // Kan vara så att det ej går att assigna path till string, isf får vi använda path.string()
-        if (dir.find(ng_id) != string::npos) {  // men får inga kompileringsfel för path = string eller path == string
+        string dir = entry.path();
+        ng_dlim = dir.find(delimiter);
+        unsigned int nid{std::stoul(dir.substr(ng_dlim+1))};
+        if (nid == ng_id) {
             ng = entry;
             break;
         }
     } if (ng.path() == "") { // Om ingen ng-mapp hittades?
-        return "";
-    } 
+        return ""; 
+    }
     fs::directory_entry art;
+    string::size_type a_dlim;
     for (const auto& entry : fs::directory_iterator(ng.path())) {
         string fn = entry.path();
-        if (fn.find(a_id) != string::npos) { // kan bli problem om ng_id == a_id
+        a_dlim = fn.substr(ng_dlim + 1).find(delimiter) + ng_dlim + 1;
+        string::size_type ppos = fn.find_last_of(".");
+        unsigned int aid{std::stoul(fn.substr(a_dlim+1, ppos-a_dlim - 1))};
+        if (aid == a_id) {
             art = entry;
             break;
         }
-    } if (ng.path().string() + "/" == art.path()) {    // Om ingen article-fil hittades?
+    } if (art.path() == "") {    // Om ingen article-fil hittades?
         return ""; 
     }
+    // art.path() = datat/ng^0/artikel1^0.txt
     // öppna filen med filestream, returna innehåll?
-    return "";
+    std::ifstream file;
+    file.open(art.path(), fstream::out);
+    string title{};
+    getline(file, title);
+    string author{};
+    getline(file, author);
+    string text{};
+    while (file.good()){
+        string s;
+        getline(file, s);
+        text +=  s+"\n";
+    }
+
+    string ret{};
+    ret += title;
+    ret += "|";
+    ret += author;
+    ret += "|";
+    ret += text;
+    return ret;
 }
 
 bool DiskDatabase::set_newsgroup(string name) {
@@ -116,14 +174,15 @@ bool DiskDatabase::set_article(unsigned int ng_id, string author, string title, 
 }
 
 bool DiskDatabase::remove_newsgroup(unsigned int ng_id) {
-    fs::directory_entry ng;
+    fs::directory_entry ng("data");
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
         if (dir.find(ng_id) != string::npos) {
             ng = entry;
             break;
         }
-    } if (ng.path() == "") { // Om ingen ng-mapp hittades?
+    cout << entry.path().string() << endl;
+    } if (ng.path().string() == "data") { // Om ingen ng-mapp hittades?
         return false; 
     } 
     fs::remove(ng.path());
@@ -185,7 +244,16 @@ string DiskDatabase::list_articles(unsigned int ng_id) {
 
 int main() {
     DiskDatabase ddb{};
+    // cout << ddb.getNewId() << endl;
+    // cout << ddb.getNewId() << endl;
+    // cout << ddb.getNewId() << endl;
+    // cout << ddb.getNewId() << endl;
+    // string s = ddb.get_newsgroup(0);
+    // cout << s << endl;
 
-    ddb.set_newsgroup("ng");
+    string a = ddb.get_article(0, 0);
+    cout << a << endl;
+
+    // ddb.set_newsgroup("ng");
     // ddb.remove_newsgroup(1);
 }
