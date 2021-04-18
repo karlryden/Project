@@ -1,5 +1,6 @@
 #include "database.h"
 #include <string>
+#include <iostream>
 #include <experimental/filesystem>
 #include <fstream>
 
