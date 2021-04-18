@@ -128,7 +128,7 @@ bool DiskDatabase::remove_article(unsigned int ng_id, unsigned int a_id) {
 string DiskDatabase::list_newsgroups() {
     string ret{};
     for (const auto& entry : fs::directory_iterator("data")) {
-        
+        ret += ng_string(entry) + "\n";
     }
     return ret;
 }
@@ -144,14 +144,14 @@ string DiskDatabase::list_articles(unsigned int ng_id) {
     } if (ng.path() == "") { // Om ingen ng-mapp hittades?
         return NULL;    // ?? 
     }
-    string ret{};
+    string ret{ng_string(ng) + "\n"};
     for (const auto& entry : fs::directory_iterator(ng.path())) {
-        ret += entry_string(entry) + "\n"; // ??
+        ret += article_string(entry) + "\n"; // ??
     }
     return ret;
 }
 
-string entry_string(fs::directory_entry entry) {
+string ng_string(fs::directory_entry entry) {
     string name = entry.path().string();
     string ng_id = entry.path().string();
 
@@ -162,6 +162,10 @@ string entry_string(fs::directory_entry entry) {
                                 [](auto c) {return !std::isdigit(c);}), ng_id.end());   
 
     return ng_id + " " + name;
+}
+
+string art_string(fs::directory_entry entry) {
+
 }
 
 int main() {
