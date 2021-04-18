@@ -28,6 +28,7 @@ bool NewsGroup::set_article(const Article& a){
         return false;
     } else{
         ng.push_back(a);
+        
         return true;
     }
 }

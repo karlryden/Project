@@ -3,12 +3,12 @@
 #include "memorydb.h"
 #include <iostream>
 #include <algorithm>
-
+#include "messagehandler.h"
 NewsServer::NewsServer(int port): Server(port), db{new MemoryDatabase()}{}
 
 
-std::string NewsServer::get_newsgroup(std::string title){
-    return "";/*db->get_newsgroup(title);*/
+std::string NewsServer::get_newsgroup(unsigned int id){
+    return db->get_newsgroup(id);
 }
 
 std::string NewsServer::get_article(unsigned int ng_id, unsigned int art_id){
@@ -42,34 +42,226 @@ std::string NewsServer::list_articles(unsigned int id){
     
 
 
-std::string NewsServer::handle_request(int comm, std::vector<int>& arg_N, std::vector<std::string>& arg_s, int end){
+std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
     std::string out;
+    int comm{conn->read()};
     switch (comm){
         case(static_cast<int>(Protocol::COM_LIST_NG)):
-            out = list_newsgroups();
+        {
+            // Read the end-byte
+            conn->read();
+
+            conn->write(static_cast<int>(Protocol::ANS_LIST_NG));
+            std::string test{list_newsgroups()};
+            std::cout << test << std::endl;
+            std::istringstream ss {test};
+            int n;
+            std::string s;
+            // Read number of newsgroups, write to conn. write id and name to conn. 
+            ss >> n;
+            conn->write(static_cast<char>(Protocol::PAR_NUM));
+            writeNumber(conn, n);
+            
+            while (ss >> n){
+                ss >> s;
+                conn->write(static_cast<char>(Protocol::PAR_NUM));
+                writeNumber(conn, n);
+                std::cout << n << std::endl;
+                conn->write(static_cast<char>(Protocol::PAR_STRING));
+                writeString(conn, s);
+            }
+            conn->write(static_cast<int>(Protocol::ANS_END));
+            
             break;
-        case(static_cast<int>(Protocol::COM_CREATE_NG)):
-            out = create_newsgroup(arg_s[0]);
+        }
+        case(static_cast<int>(Protocol::COM_CREATE_NG)):{
+            // Read the par-string byte, read the string, read the end-byte
+            conn->read();
+            std::string title{readString(conn)};
+            conn->read();
+            std::cout << title << std::endl;
+            // Write the reply
+            
+            conn->write(static_cast<int>(Protocol::ANS_CREATE_NG));
+            if (create_newsgroup(title)){
+                conn->write(static_cast<char>(Protocol::ANS_ACK));
+            }
+            else{
+                conn->write(static_cast<char>(Protocol::ANS_NAK));
+                conn->write(static_cast<char>(Protocol::ERR_NG_ALREADY_EXISTS));
+            }
+            conn->write(static_cast<int>(Protocol::ANS_END));
             break;
-        case (static_cast<int>(Protocol::COM_DELETE_NG)):
-            out = remove_newsgroup(arg_N[0]);
+        }
+        case (static_cast<int>(Protocol::COM_DELETE_NG)):{
+            // Read the par-N byte and the ID
+            conn->read();
+            int id{readNumber(conn)};
+            conn->write(static_cast<int>(Protocol::ANS_DELETE_NG));
+            if (remove_newsgroup(id)){
+                conn->write(static_cast<char>(Protocol::ANS_ACK));
+            }
+            else {
+                conn->write(static_cast<char>(Protocol::ANS_NAK));
+                conn->write(static_cast<char>(Protocol::ERR_NG_DOES_NOT_EXIST));
+            }
+            conn->write(static_cast<int>(Protocol::ANS_END));
             break;
-        case(static_cast<int>(Protocol::COM_LIST_ART)):
-            out = list_articles(arg_N[0]);
+        }
+            
+        case(static_cast<int>(Protocol::COM_LIST_ART)):{
+
+            // Read the par-n byte, the ID, and the end-byte
+            conn->read();
+            int id{readNumber(conn)};
+            conn->read();
+
+            conn->write(static_cast<int>(Protocol::ANS_LIST_ART));
+            std::string list {list_articles(id)};
+            
+            if (list.empty()){
+                conn->write(static_cast<char>(Protocol::ANS_NAK));
+                conn->write(static_cast<char>(Protocol::ERR_NG_DOES_NOT_EXIST));
+            }
+            else{
+                conn->write(static_cast<char>(Protocol::ANS_ACK));
+                std::istringstream ss{list};
+                std::string s;
+                int N;
+                int id;
+                ss >> N;
+                conn->write(static_cast<char>(Protocol::PAR_NUM));
+                writeNumber(conn, N);
+                //FIX!!!! Must read title with numbers and whitespaces!
+                for (int i = 0; i < N; i++){
+                    ss >> id;
+                    conn->write(static_cast<char>(Protocol::PAR_NUM));
+                    writeNumber(conn, id);
+                    ss >> s;
+                    conn->write(static_cast<char>(Protocol::PAR_STRING));
+                    writeString(conn, s);
+                }
+            }
+            conn->write(static_cast<int>(Protocol::ANS_END));
             break;
-        case(static_cast<int>(Protocol::COM_CREATE_ART)):
-            out = "article created";
-            create_article(arg_N[0], arg_s[0], arg_s[1], arg_s[2]);
+        }
+        case(static_cast<int>(Protocol::COM_CREATE_ART)):{
+            int id;
+            std::string title;
+            std::string author;
+            std::string text;
+            // Read the NG-id
+            conn->read();
+            id = readNumber(conn);
+
+            // read the title
+            conn->read();
+            title = readString(conn);
+
+            // read the author
+            conn->read();
+            author = readString(conn);
+
+            // Read the text
+            conn->read();
+            text = readString(conn);
+
+            // Read the end-byte
+            conn->read();
+            
+            conn->write(static_cast<int>(Protocol::ANS_CREATE_ART));
+            
+            if (create_article(id, title, author, text)){
+                conn->write(static_cast<char>(Protocol::ANS_ACK));
+            }
+            else{
+                conn->write(static_cast<char>(Protocol::ANS_NAK));
+                conn->write(static_cast<char>(Protocol::ERR_NG_DOES_NOT_EXIST));
+            }
+            conn->write(static_cast<char>(Protocol::ANS_END));
             break;
-        case(static_cast<int>(Protocol::COM_DELETE_ART)):
-            out = "article deleted";
-            remove_article(arg_N[0], arg_N[1]);
+        }
+        case(static_cast<int>(Protocol::COM_DELETE_ART)):{
+            int ng_id;
+            int art_id;
+            // read the ng id
+            conn->read();
+            ng_id = readNumber(conn);
+
+            // read the art id
+            conn->read();
+            art_id = readNumber(conn);
+
+            //read the end-byte
+            conn->read();
+
+            conn->write(static_cast<int>(Protocol::ANS_DELETE_ART));
+            
+            if (remove_article(ng_id, art_id)){
+                conn->write(static_cast<char>(Protocol::ANS_ACK));
+            }
+            else {
+                conn->write(static_cast<char>(Protocol::ANS_NAK));
+                if (get_newsgroup(ng_id).empty()){
+                    conn->write(static_cast<char>(Protocol::ERR_NG_DOES_NOT_EXIST));
+                }
+                else {
+                    conn->write(static_cast<char>(Protocol::ERR_ART_DOES_NOT_EXIST));
+                }
+            }
+            conn->write(static_cast<char>(Protocol::ANS_END));
             break;
-        case(static_cast<int>(Protocol::COM_GET_ART)):
-            out = get_article(arg_N[0], arg_N[1]);
+        }
+        case(static_cast<int>(Protocol::COM_GET_ART)):{
+            int ng_id;
+            int art_id;
+            // read the ng id
+            conn->read();
+            ng_id = readNumber(conn);
+
+            // read the art id
+            conn->read();
+            art_id = readNumber(conn);
+
+            //read the end-byte
+            conn->read();
+
+            conn->write(static_cast<int>(Protocol::ANS_GET_ART));
+            std::cout << "!" << std::endl;
+            std::string article{get_article(ng_id, art_id)};
+            std::cout << "!" << std::endl;
+            if (!(article.empty())){
+                    conn->write(static_cast<char>(Protocol::ANS_ACK));
+                    std::string::size_type curr{0};
+                    std::string::size_type prev{0};
+                    for (int j = 0; j < 3; j++){
+                        curr = article.find_first_of("|", curr);
+                        std::cout << article.substr(prev, curr - prev) << std::endl;
+
+                        conn->write(static_cast<char>(Protocol::PAR_STRING));
+                        writeString(conn, article.substr(prev, curr - prev));
+                        curr++;
+                        prev = curr;
+                    }
+                    
+                    
+
+
+            }
+            else {
+                conn->write(static_cast<char>(Protocol::ANS_NAK));
+                if (get_newsgroup(ng_id).empty()){
+                    conn->write(static_cast<char>(Protocol::ERR_NG_DOES_NOT_EXIST));
+                }
+                else {
+                    conn->write(static_cast<char>(Protocol::ERR_ART_DOES_NOT_EXIST));
+                }
+            }
+            conn->write(static_cast<char>(Protocol::ANS_END));
             break;
+        }
         default:
-            out = "CHECKCHECK";
+            std::cout << "Hur hamnade vi här????" << std::endl;
             break;
         
     }

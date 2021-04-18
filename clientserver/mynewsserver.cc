@@ -23,7 +23,7 @@ using namespace std;
 * Send a string to a client.
 * FIX: Send reply to client
 */
-void writeString(const shared_ptr<Connection>& conn, const string& s){
+void writeString_noProtocol(const shared_ptr<Connection>& conn, const string& s){
     for (char c : s) {
         conn->write(c);
     }
@@ -68,9 +68,9 @@ int main(int argc, char* argv[]){
                 int comm{};
                 vector<int> N{};
                 int end{};
-                get_request(conn, comm, N, s, end);
-                result = server.handle_request(comm, N, s, end);
-                writeString(conn, result);
+                
+                server.handle_request(conn);
+                
             } catch (ConnectionClosedException&) {
                 server.deregisterConnection(conn);
                 cout << "Client closed connection" << endl;

@@ -1,13 +1,4 @@
-
-
-//#include "client.h"
-#include "protocol.h"
-#include "connectionclosedexception.h"
-#include "connection.h"
-#include <string>
-#include <iostream>
-#include <stdexcept>
-#include <algorithm>
+#include "client.h"
 
 using std::string;
 using std::cout;
@@ -17,7 +8,6 @@ using std::stoi;
 using std::cerr;
 using std::getline;
 
-const string MSG="\nPick an action (enter number 0-7, 0 to quit): \n1. List newsgroups. \n2. Create newsgroup. \n3. Delete newsgroup. \n4. List articles in newsgroup. \n5. Create article. \n6. Delete article. \n7. Get article.\n";
 
 string read_string(){
     string temp;
@@ -27,7 +17,7 @@ string read_string(){
     res+=temp;
     return res;
 }
-void write_string(string string_p, Connection& conn){
+void write_string(string string_p, const Connection& conn){
     //        conn.write(static_cast<unsigned char>(Protocol::PAR_STRING));
             for(unsigned char c: string_p){
                 cout<<c;
@@ -40,6 +30,7 @@ int read_nbr(){
     string input{};
     int res{};
     while(cin>>input){
+        
         try{
             res=stoi(input);
 //            cout<<res<<endl;
@@ -52,7 +43,7 @@ int read_nbr(){
     return -1;
 }
 
-void create_article(Connection& conn){
+void create_article(const Connection& conn){
     int ng{};
     string title{};
     string author{};
@@ -66,31 +57,49 @@ void create_article(Connection& conn){
     cout<<"Enter text."<<endl;
     text=read_string();
     
-//    conn.write(static_cast<unsigned char>(Protocol::COM_CREATE_ART));
-//    conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
-//    conn.write(static_cast<unsigned char>(ng));
-    write_string(title, conn);
-    write_string(author, conn);
-    write_string(text, conn);
+    conn.write(static_cast<unsigned char>(Protocol::COM_CREATE_ART));
+    conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
+    writeNumber(conn, ng);
+    conn.write(static_cast<char>(Protocol::PAR_STRING));
+    writeString(conn, title);
+    conn.write(static_cast<char>(Protocol::PAR_STRING));
+    writeString(conn, author);
+    conn.write(static_cast<char>(Protocol::PAR_STRING));
+    writeString(conn, text);
 }
 
-void get_or_delete_article(){
+void delete_article(const Connection& conn){
     int ng{};
     int art{};
     cout<<"Enter identification number of the relevant newsgroup."<<endl;
     ng=read_nbr();
     cout<<"Enter identification number of the relevant article."<<endl;
     art=read_nbr();
-//    conn.write(static_cast<unsigned char>(Protocol::COM_DELETE_ART));
-    //    conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
-    //    conn.write(static_cast<unsigned char>(ng));
-    //    conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
-    //    conn.write(static_cast<unsigned char>(art));
+    conn.write(static_cast<unsigned char>(Protocol::COM_DELETE_ART));
+    conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
+    writeNumber(conn, ng);
+    conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
+    writeNumber(conn, art);
+}
+
+void get_article(const Connection& conn){
+    int ng{};
+    int art{};
+    cout<<"Enter identification number of the relevant newsgroup."<<endl;
+    ng=read_nbr();
+    cout<<"Enter identification number of the relevant article."<<endl;
+    art=read_nbr();
+    conn.write(static_cast<unsigned char>(Protocol::COM_GET_ART));
+    conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
+    writeNumber(conn, ng);
+    conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
+    writeNumber(conn, art);
 }
 
 
 
-void process_input(Connection& conn, int& input){
+void process_input(const Connection& conn, int& input){
+    
     if(!(cin>>input)){
         std::cerr<<"Error incorrect input. Exiting..."<<endl;
         exit(1);
@@ -103,87 +112,111 @@ void process_input(Connection& conn, int& input){
     switch (input) {
         case 1:
             cout<<"Listing newsgroups..."<<endl;
-//            conn.write(static_cast<unsigned char>(Protocol::COM_LIST_NG));
+            conn.write(static_cast<unsigned char>(Protocol::COM_LIST_NG));
             
             break;
         case 2:
             cout<<"Enter title of the new newsgroup."<<endl;
             string_p=read_string();
-//            conn.write(static_cast<unsigned char>(Protocol::COM_CREATE_NG));
+            conn.write(static_cast<unsigned char>(Protocol::COM_CREATE_NG));
             break;
         case 3:
             cout<<"Enter identification number of the newsgroup to be deleted."<<endl;
             num_p=read_nbr();
-//            conn.write(static_cast<unsigned char>(Protocol::COM_DELETE_NG));
+            conn.write(static_cast<unsigned char>(Protocol::COM_DELETE_NG));
            
             break;
         case 4:
             cout<<"Enter identification number of the newsgroup to be listed."<<endl;
             num_p=read_nbr();
-//            conn.write(static_cast<unsigned char>(Protocol::COM_LIST_ART));
+            conn.write(static_cast<unsigned char>(Protocol::COM_LIST_ART));
             break;
         case 5:
             create_article(conn);
             break;
         case 6:
-            get_or_delete_article();
+            delete_article(conn);
             break;
         case 7:
-            get_or_delete_article();
+            get_article(conn);
             break;
         default:
             cout<<"please enter a number between 0 and 7."<<endl;
             return;
     }
-    
-    if(string_p!=""){
-        write_string(string_p, conn);
-    }
-    
     if(num_p!=-1){
-//        conn.write(static_cast<unsigned char>(Protocol::PAR_NUM))
+        conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
+        writeNumber(conn, num_p);
         cout<<num_p<<endl;
-//        conn.write(num_p);
+        
     }
-//    conn.write(static_cast<unsigned char>(Protocol::COM_END));
+    if(string_p!=""){
+        conn.write(static_cast<unsigned char>(Protocol::PAR_STRING));
+        writeString(conn, string_p);
+    }
+    
+    
+    conn.write(static_cast<unsigned char>(Protocol::COM_END));
+    
     
 }
 
-void list(Connection& conn){
+void list(const Connection& conn){
     string res{};
-    Protocol ack_or_nak=static_cast<Protocol>(conn.read());                //om 1 -> PAR_NUM, om 4->ANS_ACK elr ANS_NACK
-    if(ack_or_nak==Protocol::ANS_NAK){
-        conn.read();                                                       //nak
+    char ack_or_nak=conn.read();                //om 1 -> PAR_NUM, om 4->ANS_ACK elr ANS_NACK
+    
+    
+    if(ack_or_nak== static_cast<char>(Protocol::ANS_NAK)){
+                                                            //nak
         cout<<"Error, newsgroup does not exist"<<endl;
         conn.read();                                                        //err does not exist
         conn.read();                                                        //ans_end
         return;
-    } else if(ack_or_nak == Protocol::ANS_ACK){
-        conn.read();                                                        //ack
+    } else if(ack_or_nak== static_cast<char>(Protocol::ANS_ACK)){
+                                                             //ack
+        conn.read();                                                        //par num
+        int n{readNumber(conn)};
+        
+        for(int i=0; i<n; i++){
+            
+            conn.read();                                                        //par num
+            int id{readNumber(conn)};
+            conn.read();                                                        //par string
+            string title{readString(conn)};
+            
+            res+=std::to_string(id) + " " + title + "\n";
+        }
+        conn.read();                                                        // ans_end
+        cout<<res<<endl;
     }
-    int n=conn.read();
+}
+
+
+void list_newsgroup(const Connection& conn){
+    string res{};
+    conn.read();                                                        //par num
+    int n{readNumber(conn)};
     for(int i=0; i<n; ++i){
         conn.read();                                                        //par num
-        int id=conn.read();
+        int id{readNumber(conn)};
+        
         conn.read();                                                        //par string
-        string title{};
-        Protocol tag = static_cast<Protocol>(conn.read());
-        while(tag != Protocol::PAR_NUM && tag != Protocol::ANS_END){
-            title+=conn.read();
-        }
-        res+=id + " " + title + "\n";
+        string title{readString(conn)};
+        
+        res+=std::to_string(id) + " " + title + "\n";
     }
+    conn.read();                                                        // ans_end
     cout<<res<<endl;
 }
 
-void create(Connection& conn){
+void create(const Connection& conn){
     string res{};
-    Protocol tag = static_cast<Protocol>(conn.read());
-    if(tag == Protocol::ANS_ACK){
+    char tag = static_cast<char>(conn.read());
+    if(tag == static_cast<char>(Protocol::ANS_ACK)){
         res = "Creation successful"; //HÄR GÅR DET ATT VARA MER SPEICIFIK
     } else {
-        Protocol tag2 = static_cast<Protocol>(conn.read());
-        if(tag2 == Protocol::ERR_NG_ALREADY_EXISTS){
+        char tag2 = static_cast<char>(conn.read());
+        if(tag2 == static_cast<char>(Protocol::ERR_NG_ALREADY_EXISTS)){
             res = "Error: Newsgroup already exists";
         } else {
             res = "Error: Newsgroup does not exist";
@@ -193,51 +226,50 @@ void create(Connection& conn){
     cout<<res<<endl;
 }
 
-void remove(Connection& conn){
+void remove(const Connection& conn){
     string res{};
-    Protocol tag = static_cast<Protocol>(conn.read());
-    if(tag == Protocol::ANS_ACK){
-        res = "Deletion successful"; //HÄR GÅR DET ATT VARA MER SPEICIFIK
-    } else{
-        Protocol tag2 = static_cast<Protocol>(conn.read());
-        if(tag2 == Protocol::ERR_NG_DOES_NOT_EXIST){
-            res = "Error: Newsgroup does not exist";
+    char tag = static_cast<char>(conn.read());
+    if(tag == static_cast<char>(Protocol::ANS_ACK)){
+        res = "Creation successful"; //HÄR GÅR DET ATT VARA MER SPEICIFIK
+    } else {
+        char tag2 = static_cast<char>(conn.read());
+        if(tag2 == static_cast<char>(Protocol::ERR_NG_ALREADY_EXISTS)){
+            res = "Error: Newsgroup already exists";
         } else {
-            res = "Error: Article does not exist";
+            res = "Error: Newsgroup does not exist";
         }
     }
     conn.read();                                                             //ans_end
     cout<<res<<endl;
 }
 
-void get_art(Connection& conn){
-    Protocol tag = static_cast<Protocol>(conn.read());
-    if(tag == Protocol::ANS_NAK){
-        Protocol tag2 = static_cast<Protocol>(conn.read());
-        if(tag2 == Protocol::ERR_NG_DOES_NOT_EXIST){
+void get_art(const Connection& conn){
+    char tag = static_cast<char>(conn.read());
+    if(tag == static_cast<char>(Protocol::ANS_NAK)){
+        char tag2 = static_cast<char>(conn.read());
+        if(tag2 == static_cast<char>(Protocol::ERR_NG_DOES_NOT_EXIST)){
             cout << "Error: Newsgroup does not exist"<<endl;;
         } else {
             cout << "Error: Article does not exist"<<endl;;
         }
     } else {
         string str;
-        for(int i = 0; i < 3; ++i){
-            Protocol tag = static_cast<Protocol>(conn.read());
-            while(tag !=Protocol::PAR_STRING && tag !=Protocol::ANS_END){
-                str+=conn.read();
-            }
+        for(int i = 0; i < 3; i++){
+            char tag = static_cast<char>(conn.read());
+            str += readString(conn);
             cout << str << endl;
             str = "";
         }
+        conn.read(); //ans_end
     }
 }
 
-void process_response(Connection& conn){
+void process_response(const Connection& conn){
     Protocol ans_tag = static_cast<Protocol>(conn.read());
     
        switch (ans_tag) {
         case Protocol::ANS_LIST_NG:
-            list(conn);
+            list_newsgroup(conn);
                
             break;
         case Protocol::ANS_CREATE_NG:
@@ -267,24 +299,26 @@ void process_response(Connection& conn){
             cout<<"Invalid server response"<<endl;
             return;
     }
-    conn.read();                                                        //ans_end
-}
-
-
-int main(/*int argc, char* argv[]*/){
-
-    Connection conn{"host",1};
-//    cout<<"\n"<<conn.isConnected() << " hej" <<endl;
-    cout<<MSG<<endl;
-    int input{};
-    while(true){
-        process_input(conn, input);
-        if(input==0){
-            cout<<"Exiting..."<<endl;
-            break;
-        }
-        process_response(conn);
-        cout<<MSG<<endl;
-    }
     
+    
+    cout << "exiting process response" << endl;
 }
+
+
+// int main(/*int argc, char* argv[]*/){
+
+//     Connection conn{"host",1};
+// //    cout<<"\n"<<conn.isConnected() << " hej" <<endl;
+//     cout<<MSG<<endl;
+//     int input{};
+//     while(true){
+//         process_input(input);
+//         if(input==0){
+//             cout<<"Exiting..."<<endl;
+//             break;
+//         }
+//         process_response(conn);
+//         cout<<MSG<<endl;
+//     }
+    
+// }
