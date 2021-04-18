@@ -1,4 +1,6 @@
 #include "diskdb.h"
+#include <algorithm>
+#include <cctype>
 
 using std::string;
 using std::cout;
@@ -8,8 +10,6 @@ using std::fstream;
 
 /*
 Tänker att vi kör att newsgroupmappar heter name+ng_id? Och sen heter articlefiler bara a_id?
-Finns en fs::exists funktion som kollar om de finns ett entry i ett dir men kör inte på den för
-måste ändå leta upp mappen om den finns sen. 
 */
 
 DiskDatabase::DiskDatabase() {
@@ -128,7 +128,7 @@ bool DiskDatabase::remove_article(unsigned int ng_id, unsigned int a_id) {
 string DiskDatabase::list_newsgroups() {
     string ret{};
     for (const auto& entry : fs::directory_iterator("data")) {
-        ret += entry; // ??
+        ret += ng_string(entry) + "\n";
     }
     return ret;
 }
@@ -144,9 +144,31 @@ string DiskDatabase::list_articles(unsigned int ng_id) {
     } if (ng.path() == "") { // Om ingen ng-mapp hittades?
         return NULL;    // ?? 
     }
-    string ret{};
+    string ret{ng_string(ng) + "\n"};
     for (const auto& entry : fs::directory_iterator(ng.path())) {
-        ret += entry; // ??
+        ret += article_string(entry) + "\n"; // ??
     }
     return ret;
+}
+
+string ng_string(fs::directory_entry entry) {
+    string name = entry.path().string();
+    string ng_id = entry.path().string();
+
+    name.erase(std::remove_if(std::begin(name), std::end(name), 
+                                [](auto c) {return std::isdigit(c);}), name.end()); 
+
+    ng_id.erase(std::remove_if(std::begin(ng_id), std::end(ng_id), 
+                                [](auto c) {return !std::isdigit(c);}), ng_id.end());   
+
+    return ng_id + " " + name;
+}
+
+string art_string(fs::directory_entry entry) {
+
+}
+
+int main() {
+    DiskDatabase ddb{};
+    
 }

@@ -1,5 +1,6 @@
 #include "database.h"
 #include <string>
+#include <iostream>
 #include <experimental/filesystem>
 #include <fstream>
 
@@ -14,13 +15,10 @@ class DiskDatabase : public Database {
         std::string get_article(unsigned int, unsigned int) const;
         bool set_newsgroup(std::string);
         bool set_article(unsigned int, std::string, std::string, std::string);
-        bool remove_newsgroup(unsigned int) = 0;
+        bool remove_newsgroup(unsigned int);
         bool remove_article(unsigned int, unsigned int);
         std::string list_articles(unsigned int);
         std::string list_newsgroups();
-
-    private:
-        std::experimental::filesystem::recursive_directory_iterator iter;
 };
 
 #endif
