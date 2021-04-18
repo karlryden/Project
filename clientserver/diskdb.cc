@@ -1,6 +1,6 @@
 #include "diskdb.h"
 #include <algorithm>
-#include <cctype>
+// #include <cctype>
 
 using std::string;
 using std::cout;
