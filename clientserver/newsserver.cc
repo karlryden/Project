@@ -56,14 +56,23 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
             std::cout << test << std::endl;
             std::istringstream ss {test};
             int n;
-            std::string s;
+            
             // Read number of newsgroups, write to conn. write id and name to conn. 
             ss >> n;
             conn->write(static_cast<char>(Protocol::PAR_NUM));
             writeNumber(conn, n);
-            
+            int length{};
             while (ss >> n){
-                ss >> s;
+                std::string s;
+                ss >> length;
+                char ch;
+                std::cout << length << std::endl;
+                for (int i = 0; i < length + 1; i++){
+                    ch = ss.get();
+                    std::cout << ch << std::endl;
+                    s += ch;
+                } 
+                std::cout << "----" << std::endl;
                 conn->write(static_cast<char>(Protocol::PAR_NUM));
                 writeNumber(conn, n);
                 std::cout << n << std::endl;
@@ -126,7 +135,7 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
             else{
                 conn->write(static_cast<char>(Protocol::ANS_ACK));
                 std::istringstream ss{list};
-                std::string s;
+                
                 int N;
                 int id;
                 ss >> N;
@@ -134,7 +143,14 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
                 writeNumber(conn, N);
                 //FIX!!!! Must read title with numbers and whitespaces!
                 for (int i = 0; i < N; i++){
+                    int length{};
+                    std::string s;
+                    
                     ss >> id;
+                    ss >> length;
+                    for (int i = 0; i < length + 1; i ++){
+                        s += ss.get();
+                    }
                     conn->write(static_cast<char>(Protocol::PAR_NUM));
                     writeNumber(conn, id);
                     ss >> s;
