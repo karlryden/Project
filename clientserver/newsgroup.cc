@@ -47,7 +47,7 @@ string NewsGroup::get_name() const {
 }
 
 string NewsGroup::to_string() const {
-    return id + " " + name + " ";
+    return name;
 }
 
 bool NewsGroup::operator==(const NewsGroup& n) const{

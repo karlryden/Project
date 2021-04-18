@@ -68,13 +68,13 @@ string MemoryDatabase::list_articles(unsigned int id){
     auto ng=std::find_if(table.begin(), table.end(), [id](const NewsGroup& n){return n.id==id;}); //get_newsgroup? men den returnerar string ?
     res+=std::to_string(ng->ng.size()) + " ";
     std::cout << ng->ng.size() << std::endl;
-    std::for_each(ng->ng.begin(), ng->ng.end(), [&res](const Article& a){res+=std::to_string(a.id)+ " " + a.get_title() + " ";});
+    std::for_each(ng->ng.begin(), ng->ng.end(), [&res](const Article& a){res+=std::to_string(a.id)+ " " + std::to_string(a.get_title().length()) + " " + a.get_title() + " ";});
     return res;
 }
 
 string MemoryDatabase::list_newsgroups(){
     string res{};
     res+=std::to_string(size()) + " ";
-    std::for_each(begin(), end(), [&res](const NewsGroup& ng){res+=std::to_string(ng.id) + " " + ng.to_string();});
+    std::for_each(begin(), end(), [&res](const NewsGroup& ng){res+=std::to_string(ng.id) + " " + std::to_string(ng.to_string().length()) + " " + ng.to_string() + " ";});
     return res;
 }
