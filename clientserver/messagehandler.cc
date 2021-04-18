@@ -3,41 +3,84 @@
 #include <vector>
 using std::string;
 using std::shared_ptr;
+
+void write4b(const shared_ptr<Connection>& conn, int N){
+    conn->write((N >> 24) & 0xFF);
+    conn->write((N >> 16) & 0xFF);
+    conn->write((N >> 8) & 0xFF);
+    conn->write(N & 0xFF);
+    
+
+}
+
+void write4b(const Connection& conn, int N){
+    conn.write((N >> 24) & 0xFF);
+    conn.write((N >> 16) & 0xFF);
+    conn.write((N >> 8) & 0xFF);
+    conn.write(N & 0xFF);
+}
+
 int readNumber(const shared_ptr<Connection>& conn){
+    
     unsigned char byte1 = conn->read();
-    std::cout << byte1 << std::endl;
     unsigned char byte2 = conn->read();
-    std::cout << byte2 << std::endl;
     unsigned char byte3 = conn->read();
-    std::cout << byte3 << std::endl;
     unsigned char byte4 = conn->read();
-    std::cout << byte1 << byte2 << byte3 << byte4 << std::endl;
     return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
 }
-string readString(const shared_ptr<Connection>& conn, int N){
+
+int readNumber(const Connection& conn){
+    unsigned char byte1 = conn.read();
+    unsigned char byte2 = conn.read();
+    unsigned char byte3 = conn.read();
+    unsigned char byte4 = conn.read();
+    return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
+}
+
+void writeNumber(const Connection& conn, int N)
+{
+    
+    write4b(conn, N);
+}
+
+void writeNumber(const shared_ptr<Connection>& conn, int N){
+    
+    write4b(conn, N);
+}
+void writeString(const shared_ptr<Connection>& conn, const string& s){
+    
+    writeNumber(conn, s.size());
+    for (unsigned char ch: s){
+        conn->write(ch);
+    }
+}
+void writeString(const Connection& conn, const string& s){
+    
+    writeNumber(conn, s.size());
+    for (unsigned char c : s) {
+        conn.write(c);
+    }
+}
+
+string readString(const Connection& conn){
     string s;
+    int N{readNumber(conn)};
     for (int i = 0; i < N; i++){
-        std::cout << s << std::endl;
+        s += conn.read();
+    }
+    return s;
+}
+
+
+string readString(const shared_ptr<Connection>& conn){
+    string s;
+    int N{readNumber(conn)};
+    for (int i = 0; i < N; i++){
         s += conn->read();
     }
     return s;
 }
 
-void get_request(const shared_ptr<Connection>& conn, int& command, std::vector<int>& N, std::vector<string>& s, int& end){
-    command = conn->read();
-    int n{conn->read()};
-    int i{0};
-    while (n != static_cast<int>(Protocol::COM_END)){
-        
-        
-        if (n == static_cast<int>(Protocol::PAR_STRING)){
-            n = conn->read();
-            s.push_back(readString(conn, n));
-        }
-        else {
-            n = conn->read();
-            N.push_back(n);
-        }
-        n = conn->read();
-    }
-}
+
+
+

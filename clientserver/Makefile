@@ -32,9 +32,9 @@ libclientserver.a: connection.o server.o
 	ar rv libclientserver.a  connection.o server.o
 	ranlib libclientserver.a
 
-
+client: client.o connection.o
 mynewsserver: newsserver.o connection.o messagehandler.o server.o memorydb.o newsgroup.o article.o
-mynewsclient: connection.o mynewsclient.o
+mynewsclient: connection.o mynewsclient.o messagehandler.o client.o
 # Phony targets
 .PHONY: all clean distclean
 

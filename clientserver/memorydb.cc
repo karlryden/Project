@@ -1,6 +1,6 @@
 #include "memorydb.h"
 #include <algorithm>
-
+#include <iostream>
 using std::string;
 using std::vector;
 using std::find;
@@ -13,9 +13,11 @@ string MemoryDatabase::get_newsgroup(unsigned int ng_id) const {
 }
 
 string MemoryDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
+    
     NewsGroup ng{*find_if(table.begin(), table.end(), [ng_id](const NewsGroup& n) {return n.id == ng_id;})};
-    Article a{ng.get_article(a_id)};
-
+    
+    Article a(ng.get_article(a_id));
+    
     return a.to_string();
 }
 
@@ -28,10 +30,8 @@ bool MemoryDatabase::set_newsgroup(string name) {                       //borde 
 
 bool MemoryDatabase::set_article(unsigned int id, string tit, string aut, string tex) {
     // NewsGroup ng{*(table.find(ng_id))};
-    NewsGroup ng{*find_if(table.begin(), table.end(), [id](const NewsGroup& n) {return n.id == id;})};
-    Article a(tit, aut, tex);
-
-    return ng.set_article(a);
+    Article a(tit, aut, tex);    
+    return find_if(table.begin(), table.end(), [id](const NewsGroup& n) {return n.id == id;})->set_article(a);
 }
 
 bool MemoryDatabase::remove_newsgroup(unsigned int ng_id) {
@@ -46,9 +46,8 @@ bool MemoryDatabase::remove_newsgroup(unsigned int ng_id) {
 }
 
 bool MemoryDatabase::remove_article(unsigned int ng_id, unsigned int a_id) {
-    NewsGroup ng{*find_if(table.begin(), table.end(), [ng_id](const NewsGroup& n) {return n.id == ng_id;})};
-    
-    return ng.remove_article(a_id);
+   
+    return find_if(table.begin(), table.end(), [ng_id](const NewsGroup& n) {return n.id == ng_id;})->remove_article(a_id);
 }
 vector<NewsGroup>::iterator MemoryDatabase::begin(){
     return table.begin();
@@ -63,16 +62,19 @@ int MemoryDatabase::size() {
 }
 
 string MemoryDatabase::list_articles(unsigned int id){
+    
     std::string res{};
-    auto ng=std::find_if(begin(), end(), [id](const NewsGroup& n){return n.id==id;}); //get_newsgroup? men den returnerar string ?
-    res+=ng->ng.size() + " ";
-    std::for_each(ng->ng.begin(), ng->ng.end(), [&res](const Article& a){res+=a.id+ " " + a.get_title() + " ";});
+    
+    auto ng=std::find_if(table.begin(), table.end(), [id](const NewsGroup& n){return n.id==id;}); //get_newsgroup? men den returnerar string ?
+    res+=std::to_string(ng->ng.size()) + " ";
+    std::cout << ng->ng.size() << std::endl;
+    std::for_each(ng->ng.begin(), ng->ng.end(), [&res](const Article& a){res+=std::to_string(a.id)+ " " + a.get_title() + " ";});
     return res;
 }
 
 string MemoryDatabase::list_newsgroups(){
     string res{};
-    res+=size() + " ";
-    std::for_each(begin(), end(), [&res](const NewsGroup& ng){res+=ng.to_string() + " " + std::to_string(ng.id);});
+    res+=std::to_string(size()) + " ";
+    std::for_each(begin(), end(), [&res](const NewsGroup& ng){res+=std::to_string(ng.id) + " " + ng.to_string();});
     return res;
 }
