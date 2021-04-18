@@ -169,5 +169,6 @@ string art_string(fs::directory_entry entry) {
 }
 
 int main() {
-
+    DiskDatabase ddb{};
+    
 }
