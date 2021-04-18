@@ -10,8 +10,8 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 # Define preprocessor, compiler, and linker flags. Uncomment the # lines
 # if you use clang++ and wish to use libc++ instead of GNU's libstdc++.
 # -g is for debugging.
-CPPFLAGS =  -std=c++11 -I.
-CXXFLAGS =  -O2 -Wall -Wextra -pedantic-errors -Wold-style-cast 
+CPPFLAGS =  -std=c++11 -lstdc++fs -I.
+CXXFLAGS =  -O2 -Wall -Wextra -pedantic-errors -Wold-style-cast
 CXXFLAGS += -std=c++11 
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
@@ -35,6 +35,8 @@ libclientserver.a: connection.o server.o
 client: client.o connection.o
 mynewsserver: newsserver.o connection.o messagehandler.o server.o memorydb.o newsgroup.o article.o
 mynewsclient: connection.o mynewsclient.o messagehandler.o client.o
+diskdb: diskdb.o
+
 # Phony targets
 .PHONY: all clean distclean
 

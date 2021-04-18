@@ -21,4 +21,10 @@ class DiskDatabase : public Database {
         std::string list_newsgroups();
 };
 
+unsigned int ng_hash(std::string);
+unsigned int art_hash(std::string, std::string);
+
+std::string ng_string(std::experimental::filesystem::directory_entry);
+std::string art_string(std::experimental::filesystem::directory_entry);
+
 #endif

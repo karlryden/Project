@@ -1,22 +1,51 @@
 #include "diskdb.h"
 #include <algorithm>
-#include <cctype>
+// #include <cctype>
 
 using std::string;
 using std::cout;
 using std::endl;
-namespace fs = std::experimental::filesystem;   //vet ej om vi borde köra på fs eller linux funktioner
+namespace fs = std::experimental::filesystem;
 using std::fstream;
 
 /*
 Tänker att vi kör att newsgroupmappar heter name+ng_id? Och sen heter articlefiler bara a_id?
 */
 
+
+unsigned int ng_hash(string name) {
+    return 1;
+}
+
+unsigned int art_hash(string title, string author) {
+    return 1;
+}
+
+string ng_string(fs::directory_entry entry) {
+    string name = entry.path().string();
+    string ng_id = entry.path().string();
+
+    name.erase(std::remove_if(std::begin(name), std::end(name), 
+                                [](auto c) {return std::isdigit(c);}), name.end()); 
+
+    ng_id.erase(std::remove_if(std::begin(ng_id), std::end(ng_id), 
+                                [](auto c) {return !std::isdigit(c);}), ng_id.end());   
+
+    return ng_id + " " + name;
+}
+
+string art_string(fs::directory_entry entry) {
+    string a_id = entry.path().string();
+    a_id.erase(std::remove_if(std::begin(a_id), std::end(a_id), 
+                                [](auto c) {return !std::isdigit(c);}), a_id.end());   
+
+    return a_id;
+}
+
 DiskDatabase::DiskDatabase() {
     if (!fs::exists("data")) {
         fs::create_directory("data");
     }
-    iter = fs::recursive_directory_iterator("data");
 }
 
 string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
@@ -28,9 +57,9 @@ string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
             break;
         }
     } if (ng.path() == "") { // Om ingen ng-mapp hittades?
-        return NULL; // ej säker på om vi ska throwa/returna någon 404
+        return ""; 
     } 
-    return ?? // vad ska vi returna? namn? artiklar?
+    return "";  // vad ska vi returna? namn? artiklar?
 }
 
 string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
@@ -42,7 +71,7 @@ string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
             break;
         }
     } if (ng.path() == "") { // Om ingen ng-mapp hittades?
-        return NULL; // ej säker på om vi ska throwa/returna någon 404
+        return "";
     } 
     fs::directory_entry art;
     for (const auto& entry : fs::directory_iterator(ng.path())) {
@@ -52,9 +81,10 @@ string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
             break;
         }
     } if (ng.path().string() + "/" == art.path()) {    // Om ingen article-fil hittades?
-        return NULL; // ej säker på om vi ska throwa/returna någon 404
+        return ""; 
     }
     // öppna filen med filestream, returna innehåll?
+    return "";
 }
 
 bool DiskDatabase::set_newsgroup(string name) {
@@ -64,8 +94,8 @@ bool DiskDatabase::set_newsgroup(string name) {
             return false; // finns redan ng med samma namn
         }
     }
-    unsigned int ng_id = ?
-    fs::create_directory("data/" + name + ng_id);
+    unsigned int ng_id = 1;
+    fs::create_directory("data/" + name);
     return true;
 }
 
@@ -142,33 +172,19 @@ string DiskDatabase::list_articles(unsigned int ng_id) {
             break;
         }
     } if (ng.path() == "") { // Om ingen ng-mapp hittades?
-        return NULL;    // ?? 
+        return "";   
     }
     string ret{ng_string(ng) + "\n"};
     for (const auto& entry : fs::directory_iterator(ng.path())) {
-        ret += article_string(entry) + "\n"; // ??
+        ret += art_string(entry) + "\n"; // ??
     }
     return ret;
 }
 
-string ng_string(fs::directory_entry entry) {
-    string name = entry.path().string();
-    string ng_id = entry.path().string();
 
-    name.erase(std::remove_if(std::begin(name), std::end(name), 
-                                [](auto c) {return std::isdigit(c);}), name.end()); 
-
-    ng_id.erase(std::remove_if(std::begin(ng_id), std::end(ng_id), 
-                                [](auto c) {return !std::isdigit(c);}), ng_id.end());   
-
-    return ng_id + " " + name;
-}
-
-string art_string(fs::directory_entry entry) {
-
-}
 
 int main() {
     DiskDatabase ddb{};
-    
+
+    ddb.set_newsgroup("ng");
 }

@@ -1,4 +1,3 @@
-#include "newsgroup.h"
 #include <string>
 
 #ifndef DATABASE_H
