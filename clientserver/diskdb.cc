@@ -168,16 +168,13 @@ bool DiskDatabase::set_newsgroup(string name) {
         ng_dlim = dir.find(delimiter);
         string nname{dir.substr(5, ng_dlim - 5)};
         if (nname == name) {
-            ng = entry;
-            break;
+            return false;
         }
-    } if (ng.path() != "") {
-        return false; 
     }
     unsigned int ng_id = getNewId();
-    fs::create_directory("data/" + name + "^" + std::to_string(ng_id));
+    fs::create_directory("data/" + name + delimiter + std::to_string(ng_id));
     fstream file;
-    file.open("data/" + name + "^" + std::to_string(ng_id) + "/art_count.txt", fstream::out);
+    file.open("data/" + name + delimiter + std::to_string(ng_id) + "/art_count.txt", fstream::out);
     file << 0;
     file.close();
     
@@ -185,10 +182,22 @@ bool DiskDatabase::set_newsgroup(string name) {
 }
 
 unsigned int DiskDatabase::getNewArtId(fs::path ng_path) {
-    return 0;
+    unsigned int new_id;
+    unsigned int next;
+    std::ifstream ifile;
+    ifile.open(ng_path.string() + "/art_count.txt", fstream::in);
+    ifile >> next;
+    new_id = next++;
+    ifile.close();
+    std::ofstream ofile;
+    ofile.open(ng_path.string() + "/art_count.txt", fstream::out);
+    ofile << next;
+    ofile.close();
+
+    return new_id;
 }
 
-bool DiskDatabase::set_article(unsigned int ng_id, string author, string title, string text) {
+bool DiskDatabase::set_article(unsigned int ng_id, string title, string author, string text) {
     fs::directory_entry ng;
     string::size_type ng_dlim;
     for (const auto& entry : fs::directory_iterator("data")) {
@@ -208,57 +217,73 @@ bool DiskDatabase::set_article(unsigned int ng_id, string author, string title, 
     for (const auto& entry : fs::directory_iterator(ng.path())) {
         string fn = entry.path();
         a_dlim = fn.substr(ng_dlim + 1).find(delimiter) + ng_dlim + 1;
-        string::size_type ppos = fn.find_last_of(".");
-        string atitle{fn.substr(a_dlim + 1, ppos - a_dlim - 1)};
+        string::size_type spos = fn.find_last_of("/");
+        string atitle{fn.substr(spos + 1, a_dlim - spos - 1)};
+        cout << atitle << endl;
         if (atitle == title) {
-            art = entry;
-            break;
-        } //data/ng^0/art^1
-    } if (art.path() == "") {    // Om ingen article-fil hittades?
-        return ""; 
+            return false;
+        }
     }
-    // jobbigt att kolla om någon artikel har samma author och titel
-    // om inte, skapa ny artikel-fil
+
+    fstream file;
+    unsigned int a_id = getNewArtId(ng.path());
+    file.open(ng.path().string() + "/" + title + delimiter + std::to_string(a_id) + ".txt", fstream::out);
+    file << title << "\n" << author << "\n" << text;
+    file.close();
+
     return true;
 }
 
 bool DiskDatabase::remove_newsgroup(unsigned int ng_id) {
-    fs::directory_entry ng("data");
+    fs::directory_entry ng;
+    string::size_type ng_dlim;
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
-        if (dir.find(ng_id) != string::npos) {
+        ng_dlim = dir.find(delimiter);
+        unsigned int nid{std::stoul(dir.substr(ng_dlim+1))};
+        cout << nid << endl;
+        if (nid == ng_id) {
             ng = entry;
-            break;
+            for (const auto& entry : fs::directory_iterator(ng.path())) {
+                fs::remove(entry.path());
+            }
+            cout << ng.path().string() << endl;
+            fs::remove(ng.path());
+            return true;
         }
-    cout << entry.path().string() << endl;
-    } if (ng.path().string() == "data") { // Om ingen ng-mapp hittades?
-        return false; 
-    } 
-    fs::remove(ng.path());
-    return true;
+    }
+    return false;
 }
 
 bool DiskDatabase::remove_article(unsigned int ng_id, unsigned int a_id) {
     fs::directory_entry ng;
+    string::size_type ng_dlim;
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
-        if (dir.find(ng_id) != string::npos) {
+        ng_dlim = dir.find(delimiter);
+        unsigned int nid{std::stoul(dir.substr(ng_dlim+1))};
+        if (nid == ng_id) {
             ng = entry;
             break;
         }
     } if (ng.path() == "") { // Om ingen ng-mapp hittades?
         return false; 
-    } 
+    }
     fs::directory_entry art;
+    string::size_type a_dlim;
+
     for (const auto& entry : fs::directory_iterator(ng.path())) {
-        string dir = entry.path();
-        if (dir.find(a_id) != string::npos) {   // kan bli problem om ng_id == a_id
+        string fn = entry.path();   // data/ng^0/art_count.txt
+        a_dlim = fn.find(delimiter);
+        unsigned int aid{std::stoul(fn.substr(a_dlim+1))};
+        if (aid == a_id && (fn.find("art_count.txt") == string::npos)) {
             art = entry;
             break;
         }
-    } if (ng.path().string() + "/" == art.path()) {    // Om ingen article-fil hittades?
-        return false;
+    } if (art.path() == "") { // Om ingen ng-mapp hittades?
+        return false; 
     }
+
     fs::remove(art.path());
     return true;
 }
@@ -303,8 +328,12 @@ int main() {
     // string a = ddb.get_article(0, 0);
     // cout << a << endl;
 
-    ddb.set_newsgroup("hej");
+    // ddb.set_article(1, "atitle", "aauthor", "atext");
+    
+    // ddb.remove_newsgroup(1);
 
     // ddb.set_newsgroup("ng");
-    // ddb.remove_newsgroup(1);
+    // ddb.set_article(0, "titel", "författare", "innehåll");
+
+    ddb.remove_article(0, 0);
 }
