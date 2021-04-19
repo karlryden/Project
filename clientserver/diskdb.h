@@ -7,6 +7,13 @@
 #ifndef DISKDB_H
 #define DISKDB_H
 
+/*
+
+Note: Forbidden
+en titel får ALDRIG innehålla tecknet som ges av delimiter eller
+"art_count.txt" resp "ng_count.txt".
+
+*/
 class DiskDatabase : public Database {
     public:
         DiskDatabase();
