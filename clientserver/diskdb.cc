@@ -344,32 +344,3 @@ string DiskDatabase::list_articles(unsigned int ng_id) {
 }
 
 
-
-int main() {
-    DiskDatabase ddb{};
-    // cout << ddb.getNewId() << endl;
-    // cout << ddb.getNewId() << endl;
-    // cout << ddb.getNewId() << endl;
-    // cout << ddb.getNewId() << endl;
-    // string s = ddb.get_newsgroup(0);
-    // cout << s << endl;
-
-    // string a = ddb.get_article(0, 0);
-    // cout << a << endl;
-
-    // ddb.set_article(1, "atitle", "aauthor", "atext");
-    
-    // ddb.remove_newsgroup(1);
-
-    // ddb.set_newsgroup("ng");
-    // ddb.set_article(0, "titel1", "författare1", "innehåll");
-    // ddb.set_article(0, "titel2", "författare2", "innehåll");
-
-    // cout << ddb.list_articles(0) << endl;
-
-    // ddb.remove_article(0, 2);
-    // cout << ddb.list_articles(0) << endl;
-
-    cout << ddb.list_newsgroups() << endl;
-
-}

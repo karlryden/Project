@@ -1,10 +1,11 @@
 #include "newsserver.h"
 #include "newsgroup.h"
 #include "memorydb.h"
+#include "diskdb.h"
 #include <iostream>
 #include <algorithm>
 #include "messagehandler.h"
-NewsServer::NewsServer(int port): Server(port), db{new MemoryDatabase()}{}
+NewsServer::NewsServer(int port): Server(port), db{new DiskDatabase()}{}
 
 
 std::string NewsServer::get_newsgroup(unsigned int id){
@@ -249,7 +250,7 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
             if (!(article.empty())){
                     conn->write(static_cast<char>(Protocol::ANS_ACK));
                     std::string::size_type curr{0};
-                    std::string::size_type prev{0};
+                    std::string::size_type   prev{0};
                     for (int j = 0; j < 3; j++){
                         curr = article.find_first_of("|", curr);
                         std::cout << article.substr(prev, curr - prev) << std::endl;
