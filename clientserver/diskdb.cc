@@ -63,15 +63,18 @@ DiskDatabase::DiskDatabase() {
 unsigned int DiskDatabase::getNewId(){
     unsigned int new_id;
     unsigned int next;
-    fstream file;
-    file.open("data/ng_count.txt", fstream::out);
-    file >> next;
+    std::ifstream ifile;
+    ifile.open("data/ng_count.txt", fstream::in);
+    ifile >> next;
     new_id = next++;
-    file << next;
-    file.close();
+    ifile.close();
+    std::ofstream ofile;
+    ofile.open("data/ng_count.txt", fstream::out);
+    ofile << next;
+    ofile.close();
+
     return new_id;
 }
-
 
 string DiskDatabase::get_newsgroup(unsigned int ng_id) const {
     fs::directory_entry ng;
@@ -127,47 +130,93 @@ string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
     file.open(art.path(), fstream::out);
     string title{};
     getline(file, title);
+    if (title.back() == '\r'){
+        title = title.substr(0, title.length() - 1);
+    }
+    
     string author{};
     getline(file, author);
+    if (author.back() == '\r'){
+        author = author.substr(0, title.length() - 1);
+    }
+    
     string text{};
     while (file.good()){
         string s;
         getline(file, s);
+        if (s.back() == '\r'){
+            s = s.substr(0, title.length() - 1);
+        }
         text +=  s+"\n";
     }
+    
     file.close();
     string ret{};
     ret += title;
-    ret += "DELIM";
+    ret += "|";
     ret += author;
-    ret += "DELIM";
+    ret += "|";
     ret += text;
-    return title + "DELIM" + author;
+    return ret;
 }
 
 bool DiskDatabase::set_newsgroup(string name) {
+    fs::directory_entry ng;
+    string::size_type ng_dlim;
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
-        if (dir.find(name) != string::npos) {
-            return false; // finns redan ng med samma namn
+        ng_dlim = dir.find(delimiter);
+        string nname{dir.substr(5, ng_dlim - 5)};
+        if (nname == name) {
+            ng = entry;
+            break;
         }
+    } if (ng.path() != "") {
+        return false; 
     }
-    unsigned int ng_id = 1;
-    fs::create_directory("data/" + name);
+    unsigned int ng_id = getNewId();
+    fs::create_directory("data/" + name + "^" + std::to_string(ng_id));
+    fstream file;
+    file.open("data/" + name + "^" + std::to_string(ng_id) + "/art_count.txt", fstream::out);
+    file << 0;
+    file.close();
+    
     return true;
+}
+
+unsigned int DiskDatabase::getNewArtId(fs::path ng_path) {
+    return 0;
 }
 
 bool DiskDatabase::set_article(unsigned int ng_id, string author, string title, string text) {
     fs::directory_entry ng;
+    string::size_type ng_dlim;
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
-        if (dir.find(ng_id) != string::npos) {
+        ng_dlim = dir.find(delimiter);
+        unsigned int nid{std::stoul(dir.substr(ng_dlim+1))};
+        if (nid == ng_id) {
             ng = entry;
             break;
         }
     } if (ng.path() == "") { // Om ingen ng-mapp hittades?
         return false; 
-    } 
+    }
+    fs::directory_entry art;
+    string::size_type a_dlim;
+
+    for (const auto& entry : fs::directory_iterator(ng.path())) {
+        string fn = entry.path();
+        a_dlim = fn.substr(ng_dlim + 1).find(delimiter) + ng_dlim + 1;
+        string::size_type ppos = fn.find_last_of(".");
+        string atitle{fn.substr(a_dlim + 1, ppos - a_dlim - 1)};
+        if (atitle == title) {
+            art = entry;
+            break;
+        } //data/ng^0/art^1
+    } if (art.path() == "") {    // Om ingen article-fil hittades?
+        return ""; 
+    }
     // jobbigt att kolla om någon artikel har samma author och titel
     // om inte, skapa ny artikel-fil
     return true;
@@ -251,8 +300,10 @@ int main() {
     // string s = ddb.get_newsgroup(0);
     // cout << s << endl;
 
-    string a = ddb.get_article(0, 0);
-    cout << a << endl;
+    // string a = ddb.get_article(0, 0);
+    // cout << a << endl;
+
+    ddb.set_newsgroup("hej");
 
     // ddb.set_newsgroup("ng");
     // ddb.remove_newsgroup(1);
