@@ -135,14 +135,14 @@ string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
         getline(file, s);
         text +=  s+"\n";
     }
-
+    file.close();
     string ret{};
     ret += title;
-    ret += "|";
+    ret += "DELIM";
     ret += author;
-    ret += "|";
+    ret += "DELIM";
     ret += text;
-    return ret;
+    return title + "DELIM" + author;
 }
 
 bool DiskDatabase::set_newsgroup(string name) {
