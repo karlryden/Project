@@ -84,7 +84,7 @@ fs::path DiskDatabase::get_newsgroup_path(unsigned int ng_id) const{
         string dir = entry.path();
         
         dlim = dir.find(delimiter);
-        unsigned int id{std::stoul(dir.substr(dlim+1))};
+        unsigned int id{static_cast<unsigned int>(std::stoul(dir.substr(dlim+1)))};
         if (id == ng_id) {
             ng = entry;
             break;
@@ -104,7 +104,7 @@ fs::path DiskDatabase::get_article_path(unsigned int ng_id, unsigned int art_id)
         string fn = entry.path();
         a_dlim = fn.substr(ng_dlim + 1).find(delimiter) + ng_dlim + 1;
         string::size_type ppos = fn.find_last_of(".");
-        unsigned int aid{std::stoul(fn.substr(a_dlim+1, ppos-a_dlim - 1))};
+        unsigned int aid{static_cast<unsigned int>(std::stoul(fn.substr(a_dlim+1, ppos-a_dlim - 1)))};
         if (aid == art_id && (fn.find("art_count.txt") == string::npos)) {
             art = entry;
             break;
@@ -241,7 +241,7 @@ bool DiskDatabase::remove_newsgroup(unsigned int ng_id) {
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
         ng_dlim = dir.find(delimiter);
-        unsigned int nid{std::stoul(dir.substr(ng_dlim+1))};
+        unsigned int nid{static_cast<unsigned int>(std::stoul(dir.substr(ng_dlim+1)))};
         if (nid == ng_id) {
             ng = entry;
             fs::remove_all(ng.path());
@@ -277,7 +277,7 @@ string DiskDatabase::list_newsgroups() {
         string ng_path{entry.path().string()};
         if (ng_path.find("ng_count.txt") == string::npos) {
             string::size_type dlim{ng_path.find(delimiter)};
-            unsigned int ng_id{std::stoul(ng_path.substr(dlim + 1))};
+            unsigned int ng_id{static_cast<unsigned int>(std::stoul(ng_path.substr(dlim + 1)))};
             string name{ng_path.substr(5, dlim - 5)};
             ret += " " + std::to_string(ng_id) + " " + std::to_string(name.length()) + " " + name;
         }
@@ -306,7 +306,7 @@ string DiskDatabase::list_articles(unsigned int ng_id) {
         string art_path{entry.path().string()};
         cout << art_path << endl;
         string::size_type a_dlim = art_path.substr(ng_dlim + 1).find(delimiter) + ng_dlim + 1;
-        unsigned int aid{std::stoul(art_path.substr(a_dlim+1))};
+        unsigned int aid{static_cast<unsigned int>(std::stoul(art_path.substr(a_dlim+1)))};
         string::size_type spos = art_path.find_last_of("/");
         if (art_path.find("art_count.txt") == string::npos) {
             string atitle{art_path.substr(spos + 1, a_dlim - spos - 1)};

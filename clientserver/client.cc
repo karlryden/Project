@@ -17,14 +17,6 @@ string read_string(){
     res+=temp;
     return res;
 }
-void write_string(string string_p, const Connection& conn){
-    //        conn.write(static_cast<unsigned char>(Protocol::PAR_STRING));
-            for(unsigned char c: string_p){
-                cout<<c;
-    //            conn.write(c);
-            }
-            cout<<endl;
-}
 
 int read_nbr(){
     string input{};
@@ -244,8 +236,8 @@ void remove(const Connection& conn){
 }
 
 void get_art(const Connection& conn){
-    char tag = static_cast<char>(conn.read());
-    if(tag == static_cast<char>(Protocol::ANS_NAK)){
+    
+    if(static_cast<char>(conn.read()) == static_cast<char>(Protocol::ANS_NAK)){
         char tag2 = static_cast<char>(conn.read());
         if(tag2 == static_cast<char>(Protocol::ERR_NG_DOES_NOT_EXIST)){
             cout << "Error: Newsgroup does not exist"<<endl;;
@@ -255,7 +247,7 @@ void get_art(const Connection& conn){
     } else {
         string str;
         for(int i = 0; i < 3; i++){
-            char tag = static_cast<char>(conn.read());
+            
             str += readString(conn);
             cout << str << endl;
             str = "";
