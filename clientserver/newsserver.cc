@@ -128,7 +128,7 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
 
             conn->write(static_cast<int>(Protocol::ANS_LIST_ART));
             std::string list {list_articles(id)};
-            
+            std::cout << list << std::endl;
             if (list.empty()){
                 conn->write(static_cast<char>(Protocol::ANS_NAK));
                 conn->write(static_cast<char>(Protocol::ERR_NG_DOES_NOT_EXIST));
@@ -140,6 +140,7 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
                 int N;
                 int id;
                 ss >> N;
+                
                 conn->write(static_cast<char>(Protocol::PAR_NUM));
                 writeNumber(conn, N);
                 //FIX!!!! Must read title with numbers and whitespaces!
@@ -154,7 +155,7 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
                     }
                     conn->write(static_cast<char>(Protocol::PAR_NUM));
                     writeNumber(conn, id);
-                    ss >> s;
+                    
                     conn->write(static_cast<char>(Protocol::PAR_STRING));
                     writeString(conn, s);
                 }

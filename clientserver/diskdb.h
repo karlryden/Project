@@ -29,6 +29,8 @@ class DiskDatabase : public Database {
 
         unsigned int getNewId();
         unsigned int getNewArtId(std::experimental::filesystem::path);
+        std::experimental::filesystem::path get_newsgroup_path(unsigned int) const;
+        std::experimental::filesystem::path get_article_path(unsigned int, unsigned int) const;
 };
 
 unsigned int ng_hash(std::string);

@@ -147,7 +147,7 @@ void process_input(const Connection& conn, int& input){
     if(num_p!=-1){
         conn.write(static_cast<unsigned char>(Protocol::PAR_NUM));
         writeNumber(conn, num_p);
-        cout<<num_p<<endl;
+        
         
     }
     if(string_p!=""){
