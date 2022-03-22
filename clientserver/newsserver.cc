@@ -107,6 +107,7 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
             // Read the par-N byte and the ID
             conn->read();
             int id{readNumber(conn)};
+            conn->read();
             conn->write(static_cast<int>(Protocol::ANS_DELETE_NG));
             if (remove_newsgroup(id)){
                 conn->write(static_cast<char>(Protocol::ANS_ACK));
@@ -278,7 +279,7 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
             break;
         }
         default:
-            std::cout << "Hur hamnade vi här????" << std::endl;
+            std::cout << "Hur hamnade vi här????"<< comm << std::endl;
             break;
         
     }
