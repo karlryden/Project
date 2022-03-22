@@ -5,7 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include "messagehandler.h"
-NewsServer::NewsServer(int port): Server(port), db{new DiskDatabase()}{}
+NewsServer::NewsServer(int port): Server(port), db{new MemoryDatabase()}{}
 
 
 std::string NewsServer::get_newsgroup(unsigned int id){
@@ -249,23 +249,22 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
             std::string article{get_article(ng_id, art_id)};
             std::cout << "!" << std::endl;
             if (!(article.empty())){
-                    conn->write(static_cast<char>(Protocol::ANS_ACK));
-                    std::string::size_type curr{0};
-                    std::string::size_type   prev{0};
-                    for (int j = 0; j < 3; j++){
-                        curr = article.find_first_of("|", curr);
-                        std::cout << article.substr(prev, curr - prev) << std::endl;
+                conn->write(static_cast<char>(Protocol::ANS_ACK));
+                std::string::size_type curr{0};
+                std::string::size_type   prev{0};
+                for (int j = 0; j < 3; j++){
+                    curr = article.find_first_of("|", curr);
+                    std::cout << article.substr(prev, curr - prev) << std::endl;
 
-                        conn->write(static_cast<char>(Protocol::PAR_STRING));
-                        writeString(conn, article.substr(prev, curr - prev));
-                        curr++;
-                        prev = curr;
-                    }
-                    
-                    
-
-
+                    conn->write(static_cast<char>(Protocol::PAR_STRING));
+                    std::cout << "Sent PAR_STRING from server" << std::endl;
+                    writeString(conn, article.substr(prev, curr - prev));
+                    std::cout << "Sending strings from server" << std::endl;
+                    curr++;
+                    prev = curr;
+                }
             }
+
             else {
                 conn->write(static_cast<char>(Protocol::ANS_NAK));
                 if (get_newsgroup(ng_id).empty()){

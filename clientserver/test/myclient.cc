@@ -63,10 +63,10 @@ Connection init(int argc, char* argv[])
 int app(const Connection& conn)
 {
         cout << "Type a number: ";
-        
+        int nbr{}
         while (true) {
                 try {
-                        cout << nbr << " is ...";
+                        int nbr << " is ...";
                         writeNumber(conn, nbr);
                         string reply = readString(conn);
                         cout << " " << reply << endl;

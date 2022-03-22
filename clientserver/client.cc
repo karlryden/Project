@@ -25,7 +25,6 @@ int read_nbr(){
         
         try{
             res=stoi(input);
-//            cout<<res<<endl;
             return res;
         }catch(std::exception& e){
             cout<<"Not a valid entry. Enter a number."<<endl;        //skulle kunna ha en kontroll för range också - kräver exvis attribut för att hålla kolla på vilka id som finns
@@ -240,14 +239,14 @@ void get_art(const Connection& conn){
     if(static_cast<char>(conn.read()) == static_cast<char>(Protocol::ANS_NAK)){
         char tag2 = static_cast<char>(conn.read());
         if(tag2 == static_cast<char>(Protocol::ERR_NG_DOES_NOT_EXIST)){
-            cout << "Error: Newsgroup does not exist"<<endl;;
+            cout << "Error: Newsgroup does not exist"<<endl;
         } else {
-            cout << "Error: Article does not exist"<<endl;;
+            cout << "Error: Article does not exist"<<endl;
         }
     } else {
         string str;
         for(int i = 0; i < 3; i++){
-            
+            cout<<i<<endl;
             str += readString(conn);
             cout << str << endl;
             str = "";
@@ -257,6 +256,7 @@ void get_art(const Connection& conn){
 }
 
 void process_response(const Connection& conn){
+    cout<<"Processing response"<<endl;
     Protocol ans_tag = static_cast<Protocol>(conn.read());
     
        switch (ans_tag) {
@@ -284,6 +284,7 @@ void process_response(const Connection& conn){
             
             break;
         case Protocol::ANS_GET_ART:
+                cout << "Getting articles" << endl;
                get_art(conn);
             
             break;

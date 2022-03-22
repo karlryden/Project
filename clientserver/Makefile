@@ -15,10 +15,12 @@ CXXFLAGS =  -O2 -Wall -Wextra -pedantic-errors -Wold-style-cast
 CXXFLAGS += -std=c++11 
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
-LDFLAGS =   -g
+LDFLAGS =   -g 
 #CPPFLAGS += -stdlib=libc++
 #CXXFLAGS += -stdlib=libc++
 #LDFLAGS +=  -stdlib=libc++
+
+LDLIBS = -lstdc++fs
 
 # Targets
 
@@ -33,10 +35,8 @@ libclientserver.a: connection.o server.o
 	ranlib libclientserver.a
 
 client: client.o connection.o
-mynewsserver: newsserver.o connection.o messagehandler.o server.o memorydb.o diskdb.o newsgroup.o article.o
+mynewsserver: newsserver.o connection.o messagehandler.o server.o diskdb.o memorydb.o newsgroup.o article.o
 mynewsclient: connection.o mynewsclient.o messagehandler.o client.o
-diskdb: diskdb.o
-
 # Phony targets
 .PHONY: all clean distclean
 
