@@ -3,6 +3,8 @@
 #include <vector>
 using std::string;
 using std::shared_ptr;
+using std::cout;
+using std::endl;
 
 void write4b(const shared_ptr<Connection>& conn, int N){
     conn->write((N >> 24) & 0xFF);
@@ -39,7 +41,6 @@ int readNumber(const Connection& conn){
 
 void writeNumber(const Connection& conn, int N)
 {
-    
     write4b(conn, N);
 }
 
@@ -59,6 +60,7 @@ void writeString(const Connection& conn, const string& s){
     writeNumber(conn, s.size());
     for (unsigned char c : s) {
         conn.write(c);
+        cout << c << endl;
     }
 }
 
@@ -67,6 +69,7 @@ string readString(const Connection& conn){
     int N{readNumber(conn)};
     for (int i = 0; i < N; i++){
         s += conn.read();
+        cout << s << endl;
     }
     return s;
 }
@@ -75,7 +78,7 @@ string readString(const Connection& conn){
 string readString(const shared_ptr<Connection>& conn){
     string s;
     int N{readNumber(conn)};
-    for (int i = 0; i < N; i++){
+    for (int i = 0; i < N ; i++){
         s += conn->read();
     }
     return s;

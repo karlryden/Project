@@ -14,7 +14,7 @@ NewsGroup::NewsGroup(const string& n) : name{n}, id(count++) {}
 Article NewsGroup::get_article(unsigned int id) const {
     auto res=std::find_if(ng.begin(), ng.end(), [id](const Article& a) {return a.id == id;});
     if(res == ng.end()){
-        throw std::invalid_argument("element not found");            //ngt exception
+        throw std::invalid_argument("element not found");           //ngt exception
     } else {
         return *res;
     }

@@ -68,16 +68,21 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
                 ss >> length;
                 char ch;
                 std::cout << length << std::endl;
+                
                 for (int i = 0; i < length + 1; i++){
                     ch = ss.get();
                     std::cout << ch << std::endl;
-                    s += ch;
+                    if (i > 0) {
+                        s += ch;
+                    }
                 } 
+                std::cout << s << std::endl;
                 std::cout << "----" << std::endl;
                 conn->write(static_cast<char>(Protocol::PAR_NUM));
                 writeNumber(conn, n);
                 std::cout << n << std::endl;
                 conn->write(static_cast<char>(Protocol::PAR_STRING));
+                std::cout << s.size() << std::endl;
                 writeString(conn, s);
             }
             conn->write(static_cast<int>(Protocol::ANS_END));
@@ -107,6 +112,7 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
             // Read the par-N byte and the ID
             conn->read();
             int id{readNumber(conn)};
+            conn->read();
             conn->write(static_cast<int>(Protocol::ANS_DELETE_NG));
             if (remove_newsgroup(id)){
                 conn->write(static_cast<char>(Protocol::ANS_ACK));
@@ -143,7 +149,6 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
                 
                 conn->write(static_cast<char>(Protocol::PAR_NUM));
                 writeNumber(conn, N);
-                //FIX!!!! Must read title with numbers and whitespaces!
                 for (int i = 0; i < N; i++){
                     int length{};
                     std::string s;
@@ -151,7 +156,10 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
                     ss >> id;
                     ss >> length;
                     for (int i = 0; i < length + 1; i ++){
-                        s += ss.get();
+                        char ch = ss.get();
+                        if (i > 0) {
+                            s += ch;
+                        }
                     }
                     conn->write(static_cast<char>(Protocol::PAR_NUM));
                     writeNumber(conn, id);
@@ -245,9 +253,7 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
             conn->read();
 
             conn->write(static_cast<int>(Protocol::ANS_GET_ART));
-            std::cout << "!" << std::endl;
             std::string article{get_article(ng_id, art_id)};
-            std::cout << "!" << std::endl;
             if (!(article.empty())){
                     conn->write(static_cast<char>(Protocol::ANS_ACK));
                     std::string::size_type curr{0};
@@ -261,10 +267,6 @@ std::string NewsServer::handle_request(const std::shared_ptr<Connection>& conn){
                         curr++;
                         prev = curr;
                     }
-                    
-                    
-
-
             }
             else {
                 conn->write(static_cast<char>(Protocol::ANS_NAK));

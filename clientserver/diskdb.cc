@@ -80,17 +80,24 @@ unsigned int DiskDatabase::getNewId(){
 fs::path DiskDatabase::get_newsgroup_path(unsigned int ng_id) const{
     fs::directory_entry ng;
     string::size_type dlim;
+    bool ng_found{false};
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
-        
-        dlim = dir.find(delimiter);
-        unsigned int id{static_cast<unsigned int>(std::stoul(dir.substr(dlim+1)))};
-        if (id == ng_id) {
-            ng = entry;
-            break;
-        }
+        if (dir.compare("data/ng_count.txt")) {
+            dlim = dir.find(delimiter);;
+            unsigned int id{static_cast<unsigned int>(std::stoul(dir.substr(dlim+1)))};
+            if (id == ng_id) {
+                ng = entry;
+                ng_found = true;
+                break;
+            }
+        }  
     }
-    return ng.path();
+    if (ng_found) {
+        return ng.path();
+    } else {
+        return "";
+    }
 }
 fs::path DiskDatabase::get_article_path(unsigned int ng_id, unsigned int art_id) const{
     fs::path ng_path{get_newsgroup_path(ng_id)};
@@ -159,7 +166,7 @@ string DiskDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
         }
         text +=  s+"\n";
     }
-    
+    text = text.substr(0, text.length() - 1);
     file.close();
     string ret{};
     ret += title;
@@ -240,14 +247,16 @@ bool DiskDatabase::remove_newsgroup(unsigned int ng_id) {
     string::size_type ng_dlim;
     for (const auto& entry : fs::directory_iterator("data")) {
         string dir = entry.path();
-        ng_dlim = dir.find(delimiter);
-        unsigned int nid{static_cast<unsigned int>(std::stoul(dir.substr(ng_dlim+1)))};
-        if (nid == ng_id) {
-            ng = entry;
-            fs::remove_all(ng.path());
+        if (dir.compare("data/ng_count.txt")) {
+            ng_dlim = dir.find(delimiter);
+            unsigned int nid{static_cast<unsigned int>(std::stoul(dir.substr(ng_dlim+1)))};
+            if (nid == ng_id) {
+                ng = entry;
+                fs::remove_all(ng.path());
 
-            return true;
-        }
+                return true;
+            }
+        }       
     }
     return false;
 }
@@ -277,6 +286,7 @@ string DiskDatabase::list_newsgroups() {
         string ng_path{entry.path().string()};
         if (ng_path.find("ng_count.txt") == string::npos) {
             string::size_type dlim{ng_path.find(delimiter)};
+            cout << ng_path.substr(dlim + 1) << endl;
             unsigned int ng_id{static_cast<unsigned int>(std::stoul(ng_path.substr(dlim + 1)))};
             string name{ng_path.substr(5, dlim - 5)};
             ret += " " + std::to_string(ng_id) + " " + std::to_string(name.length()) + " " + name;
@@ -288,6 +298,7 @@ string DiskDatabase::list_newsgroups() {
 string DiskDatabase::list_articles(unsigned int ng_id) {
     string ret{};
     string::size_type ng_dlim;
+    std::vector<std::pair<int, string>> output;
     int nbr_art{-1};
     
     fs::path ng_path{get_newsgroup_path(ng_id)};
@@ -304,16 +315,18 @@ string DiskDatabase::list_articles(unsigned int ng_id) {
     ret += std::to_string(nbr_art);
     for (const auto& entry : fs::directory_iterator(ng_path)) {
         string art_path{entry.path().string()};
-        cout << art_path << endl;
+
         string::size_type a_dlim = art_path.substr(ng_dlim + 1).find(delimiter) + ng_dlim + 1;
         unsigned int aid{static_cast<unsigned int>(std::stoul(art_path.substr(a_dlim+1)))};
         string::size_type spos = art_path.find_last_of("/");
         if (art_path.find("art_count.txt") == string::npos) {
             string atitle{art_path.substr(spos + 1, a_dlim - spos - 1)};
-            
-            ret += " " + std::to_string(aid) + " " + std::to_string(atitle.length()) + " " + atitle;
+            std::pair<int, string> ap{aid,  " " + std::to_string(aid) + " " + std::to_string(atitle.length()) + " " + atitle};
+            output.push_back(ap);
         }
     }
+    std::sort(output.begin(), output.end(), [](const std::pair<int, string>& p1, const std::pair<int, string>& p2){return (p1.first < p2.first);});
+    std::for_each(output.begin(), output.end(), [&ret](const std::pair<int, string>& p){ret += p.second;});
     cout << ret << endl;
     return ret;
 }
