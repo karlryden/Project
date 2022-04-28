@@ -5,7 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include "messagehandler.h"
-NewsServer::NewsServer(int port): Server(port), db{new DiskDatabase()}{}
+NewsServer::NewsServer(int port): Server(port), db{new MemoryDatabase()}{}
 
 
 std::string NewsServer::get_newsgroup(unsigned int id){

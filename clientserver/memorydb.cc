@@ -7,9 +7,12 @@ using std::find;
 using std::find_if;
 
 string MemoryDatabase::get_newsgroup(unsigned int ng_id) const {
-    NewsGroup ng{*find_if(table.begin(), table.end(), [ng_id](const NewsGroup& n) {return n.id == ng_id;})};
-    
-    return ng.to_string();
+    auto ng{find_if(table.begin(), table.end(), [ng_id](const NewsGroup& n) {return n.id == ng_id;})};
+    if (ng != table.end()) {
+        return ng->to_string();
+    } else {
+        return "";
+    }
 }
 
 string MemoryDatabase::get_article(unsigned int ng_id, unsigned int a_id) const {
@@ -61,8 +64,12 @@ bool MemoryDatabase::remove_newsgroup(unsigned int ng_id) {
 }
 
 bool MemoryDatabase::remove_article(unsigned int ng_id, unsigned int a_id) {
-   
-    return find_if(table.begin(), table.end(), [ng_id](const NewsGroup& n) {return n.id == ng_id;})->remove_article(a_id);
+    auto ng = find_if(table.begin(), table.end(), [ng_id](const NewsGroup& n) {return n.id == ng_id;});
+    if (ng != table.end()) {
+        return ng->remove_article(a_id);
+    } else {
+        return false;
+    }    
 }
 vector<NewsGroup>::iterator MemoryDatabase::begin(){
     return table.begin();

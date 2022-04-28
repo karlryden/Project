@@ -1,7 +1,7 @@
 #include "database.h"
 #include <string>
 #include <iostream>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 
 #ifndef DISKDB_H
@@ -28,15 +28,15 @@ class DiskDatabase : public Database {
         std::string list_newsgroups();
 
         unsigned int getNewId();
-        unsigned int getNewArtId(std::experimental::filesystem::path);
-        std::experimental::filesystem::path get_newsgroup_path(unsigned int) const;
-        std::experimental::filesystem::path get_article_path(unsigned int, unsigned int) const;
+        unsigned int getNewArtId(std::filesystem::path);
+        std::filesystem::path get_newsgroup_path(unsigned int) const;
+        std::filesystem::path get_article_path(unsigned int, unsigned int) const;
 };
 
 unsigned int ng_hash(std::string);
 unsigned int art_hash(std::string, std::string);
 
-std::string ng_string(std::experimental::filesystem::directory_entry);
-std::string art_string(std::experimental::filesystem::directory_entry);
+std::string ng_string(std::filesystem::directory_entry);
+std::string art_string(std::filesystem::directory_entry);
 
 #endif

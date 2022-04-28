@@ -101,6 +101,7 @@ void process_input(const Connection& conn, int& input){
     }
     string string_p{};
     int num_p{-1};
+    bool sent_request{true};
     switch (input) {
         case 1:
             cout<<"Listing newsgroups..."<<endl;
@@ -134,6 +135,7 @@ void process_input(const Connection& conn, int& input){
             break;
         default:
             cout<<"please enter a number between 0 and 7."<<endl;
+            sent_request = false;
             return;
     }
     if(num_p!=-1){
@@ -147,10 +149,9 @@ void process_input(const Connection& conn, int& input){
         writeString(conn, string_p);
     }
     
-    
-    conn.write(static_cast<unsigned char>(Protocol::COM_END));
-    
-    
+    if (sent_request) {
+        conn.write(static_cast<unsigned char>(Protocol::COM_END));
+    }
 }
 
 void list(const Connection& conn){
@@ -247,13 +248,13 @@ void get_art(const Connection& conn){
     } else {
         string str;
         for(int i = 0; i < 3; i++){
-            
+            conn.read(); 
             str += readString(conn);
             cout << str << endl;
             str = "";
         }
-        conn.read(); //ans_end
     }
+    conn.read(); //ans_end
 }
 
 void process_response(const Connection& conn){
@@ -280,11 +281,11 @@ void process_response(const Connection& conn){
             
             break;
         case Protocol::ANS_DELETE_ART:
-               remove(conn);
+            remove(conn);
             
             break;
         case Protocol::ANS_GET_ART:
-               get_art(conn);
+            get_art(conn);
             
             break;
         default:

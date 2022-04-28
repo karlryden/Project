@@ -69,7 +69,6 @@ string readString(const Connection& conn){
     int N{readNumber(conn)};
     for (int i = 0; i < N; i++){
         s += conn.read();
-        cout << s << endl;
     }
     return s;
 }
