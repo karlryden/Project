@@ -9,7 +9,7 @@ using std::vector;
 
 unsigned int NewsGroup::count{0};
 
-NewsGroup::NewsGroup(const string& n) : name{n}, id(count++) {}
+NewsGroup::NewsGroup(const string& n) : id(count++), name{n} {}
 
 Article NewsGroup::get_article(unsigned int id) const {
     auto res=std::find_if(ng.begin(), ng.end(), [id](const Article& a) {return a.id == id;});

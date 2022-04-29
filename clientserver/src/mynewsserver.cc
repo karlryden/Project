@@ -65,9 +65,7 @@ int main(int argc, char* argv[]){
         if (conn != nullptr) {
             try {
                 vector<string> s;
-                int comm{};
                 vector<int> N{};
-                int end{};
                 
                 server.handle_request(conn);
                 

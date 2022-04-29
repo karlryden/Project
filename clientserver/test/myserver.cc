@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
                 auto conn = server.waitForActivity();
                 if (conn != nullptr) {
                         try {
-                                int    nbr = readNumber(conn);
+                                int nbr = readNumber(conn);
                                 string result;
                                 if (nbr > 0) {
                                         result = "positive";

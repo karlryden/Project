@@ -35,8 +35,4 @@ class DiskDatabase : public Database {
 
 unsigned int ng_hash(std::string);
 unsigned int art_hash(std::string, std::string);
-
-std::string ng_string(std::filesystem::directory_entry);
-std::string art_string(std::filesystem::directory_entry);
-
 #endif

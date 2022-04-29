@@ -15,14 +15,6 @@ Tänker att vi kör att newsgroupmappar heter name+ng_id? Och sen heter articlef
 */
 
 
-unsigned int ng_hash(string name) {
-    return 1;
-}
-
-unsigned int art_hash(string title, string author) {
-    return 1;
-}
-
 string ng_string(fs::directory_entry entry) {
     string name = entry.path().string();
     string ng_id = entry.path().string();
@@ -50,7 +42,6 @@ DiskDatabase::DiskDatabase() {
         fs::create_directory("data");
     }
     fstream file;
-    int id{0};
     if (!fs::exists("data/ng_count.txt")) {
         cout << "creating count" << endl;
         file.open("data/ng_count.txt", fstream::out);

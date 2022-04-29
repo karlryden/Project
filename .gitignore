@@ -32,3 +32,6 @@
 *.app
 
 *.json
+
+# Other
+data/

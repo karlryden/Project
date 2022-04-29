@@ -1,11 +1,10 @@
 #include "newsserver.h"
 #include "newsgroup.h"
-#include "memorydb.h"
 #include "diskdb.h"
 #include <iostream>
 #include <algorithm>
 #include "messagehandler.h"
-NewsServer::NewsServer(int port): Server(port), db{new MemoryDatabase()}{}
+NewsServer::NewsServer(int port): Server(port), db{new DiskDatabase()}{}
 
 
 std::string NewsServer::get_newsgroup(unsigned int id){
