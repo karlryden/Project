@@ -22,12 +22,11 @@ LDFLAGS =   -g -I.
 #LDFLAGS +=  -stdlib=libc++
 
 # Targets
-TARGETS = memorynewsserver disknewsserver mynewsclient
+TARGETS = mynewsserver mynewsclient
 all: $(TARGETS) libclientserver.a
 	make -C test
 
-MEMOBJS =  connection.o messagehandler.o server.o memorydb.o newsgroup.o article.o memorynewsserver.o mynewsserver.o
-DISKOBJS = connection.o messagehandler.o server.o diskdb.o newsgroup.o article.o disknewsserver.o mynewsserver.o
+MYSERVEROBJS =  connection.o messagehandler.o server.o memorydb.o diskdb.o newsgroup.o article.o newsserver.o mynewsserver.o
 MYCLIENTOBJS = connection.o mynewsclient.o messagehandler.o client.o
 CLIENTOBJS = connection.o client.o
 # Create the library; ranlib is for Darwin (OS X) and maybe other systems.
@@ -39,10 +38,8 @@ libclientserver.a: connection.o server.o
 
 client: $(CLIENTOBJS)
 	$(CC) $(LDFLAGS) $^ -o client
-disknewsserver: $(DISKOBJS)
-	$(CC) $(LDFLAGS) $^ -o disknewsserver
-memorynewsserver: $(MEMOBJS)
-	$(CC) $(LDFLAGS) $^ -o memorynewsserver
+mynewsserver: $(MYSERVEROBJS)
+	$(CC) $(LDFLAGS) $^ -o mynewsserver
 mynewsclient: $(MYCLIENTOBJS)
 	$(CC) $(LDFLAGS) $^ -o mynewsclient
 

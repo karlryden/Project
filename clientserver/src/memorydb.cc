@@ -90,7 +90,6 @@ string MemoryDatabase::list_articles(unsigned int id){
     auto ng=std::find_if(table.begin(), table.end(), [id](const NewsGroup& n){return n.id==id;});
     if(ng != table.end()) {
         res+=std::to_string(ng->ng.size()) + " ";
-        std::cout << ng->ng.size() << std::endl;
         std::for_each(ng->ng.begin(), ng->ng.end(), [&res](const Article& a){res+=std::to_string(a.id)+ " " + std::to_string(a.get_title().length()) + " " + a.get_title() + " ";});
     } //get_newsgroup? men den returnerar string ?
     return res;

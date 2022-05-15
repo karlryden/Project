@@ -25,7 +25,6 @@ int read_nbr(){
         
         try{
             res=stoi(input);
-//            cout<<res<<endl;
             return res;
         }catch(std::exception& e){
             cout<<"Not a valid entry. Enter a number."<<endl;        //skulle kunna ha en kontroll för range också - kräver exvis attribut för att hålla kolla på vilka id som finns

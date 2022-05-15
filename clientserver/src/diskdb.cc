@@ -108,7 +108,6 @@ fs::path DiskDatabase::get_article_path(unsigned int ng_id, unsigned int art_id)
             break;
         }
     }
-    cout << art.path().string() << endl;
     return art.path();
 
 }
@@ -277,7 +276,6 @@ string DiskDatabase::list_newsgroups() {
         string ng_path{entry.path().string()};
         if (ng_path.find("ng_count.txt") == string::npos) {
             string::size_type dlim{ng_path.find(delimiter)};
-            cout << ng_path.substr(dlim + 1) << endl;
             unsigned int ng_id{static_cast<unsigned int>(std::stoul(ng_path.substr(dlim + 1)))};
             string name{ng_path.substr(5, dlim - 5)};
             ret += " " + std::to_string(ng_id) + " " + std::to_string(name.length()) + " " + name;
@@ -318,7 +316,6 @@ string DiskDatabase::list_articles(unsigned int ng_id) {
     }
     std::sort(output.begin(), output.end(), [](const std::pair<int, string>& p1, const std::pair<int, string>& p2){return (p1.first < p2.first);});
     std::for_each(output.begin(), output.end(), [&ret](const std::pair<int, string>& p){ret += p.second;});
-    cout << ret << endl;
     return ret;
 }
 

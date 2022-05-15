@@ -10,7 +10,7 @@
 
 class NewsServer : public Server {
     public:
-        NewsServer(int);
+        NewsServer(int, bool);
         
         std::string get_newsgroup(unsigned int);
         std::string get_article(unsigned int, unsigned int);
